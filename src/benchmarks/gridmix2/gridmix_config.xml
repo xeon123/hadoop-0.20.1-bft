@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="nutch-conf.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+
+
+<property>
+  <name>GRID_MIX_DATA</name>
+  <value>/gridmix/data</value>
+  <description></description>
+</property>
+
+<property>
+  <name>FIXCOMPTEXT</name>
+  <value>${GRID_MIX_DATA}/EntropySimulationCompressed</value>
+  <description></description>
+</property>
+
+<property>
+  <name>VARINFLTEXT</name>
+  <value>${GRID_MIX_DATA}/SortUncompressed</value>
+  <description></description>
+</property>
+
+<property>
+  <name>FIXCOMPSEQ</name>
+  <value>${GRID_MIX_DATA}/MonsterQueryBlockCompressed</value>
+  <description></description>
+</property>
+
+<property>
+  <name>VARCOMPSEQ</name>
+  <value>${GRID_MIX_DATA}/WebSimulationBlockCompressed</value>
+  <description></description>
+</property>
+
+
+<!-- small -->
+<property>
+  <name>streamSort.small1Jobs.inputFiles</name>
+  <value>${VARINFLTEXT}/{part-000*0,part-000*1,part-00002,part-000*3,part-000*4,part-000*5}</value>
+  <description></description>
+</property>
+
+<property>
+  <name>streamSort.small1Jobs.numOfJobs</name>
+  <value>1</value>
+  <description></description>
+</property>
+
+<property>
+  <name>streamSort.small1Jobs.numOfReduces</name>
+  <value>5</value>
+  <description></description>
+</property>
+
+<property>
+  <name>streamSort.small1Jobs.numOfMapoutputCompressed</name>
+  <value>0</value>
+  <description> </description>
+</property>
+
+<property>
+  <name>streamSort.small1Jobs.numOfOutputCompressed</name>
+  <value>0</value>
+  <description> </description>
+</property>
+
+<!-- small -->
+<property>
+  <name>pscSort.small1Jobs.inputFiles</name>
+  <value>${VARINFLTEXT}/{part-00000,part-00001,part-00002,part-00003}</value>
+  <description></description>
+</property>
+
+<property>
+  <name>pscSort.small1Jobs.numOfJobs</name>
+  <value>1</value>
+  <description></description>
+</property>
+
+<property>
+  <name>pscSort.small1Jobs.numOfReduces</name>
+  <value>1</value>
+  <description></description>
+</property>
+
+<property>
+  <name>pscSort.small1Jobs.numOfMapoutputCompressed</name>
+  <value>0</value>
+  <description> </description>
+</property>
+
+<property>
+  <name>pscSort.small1Jobs.numOfOutputCompressed</name>
+  <value>0</value>
+  <description> </description>
+</property>
+
+</configuration>
