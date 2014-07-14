@@ -3,7 +3,6 @@ package org.apache.hadoop.mapred;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.logging.Log;
@@ -52,7 +51,6 @@ public class Sha256Hash extends ShaAbstractHash {
 			return new byte[0];
 
 		byte[] digest = null;
-		newInstance();
 
 		try {
 			digest = generateHash(rfs.open(filename));
@@ -68,17 +66,14 @@ public class Sha256Hash extends ShaAbstractHash {
 		if(bis == null)
 			LOG.debug("DATA IS NULL. - " + mapOutputLength);
 
+		LOG.debug("Offset: " + offset + " mapoutputlength: " + mapOutputLength);
+		
 		if(mapOutputLength <= 0)
 			return new byte[0];
 
 		MessageDigest md1 = null;
 		try {
-			try {
-				md1 = MessageDigest.getInstance("SHA-1");
-			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			md1 = newInstance();
 			int size;
 			byte[] buffer;
 			while (mapOutputLength > 0) {
@@ -90,7 +85,8 @@ public class Sha256Hash extends ShaAbstractHash {
 					break;
 
 				buffer = new byte[size];
-				if(bis.read(buffer, offset, size) < 0)
+				//if(bis.read(buffer, offset,size) < 0)
+				if(bis.read(buffer, offset,size) < 0)
 					break;
 
 				md1.update(buffer);
@@ -150,10 +146,11 @@ public class Sha256Hash extends ShaAbstractHash {
 	 */
 	byte[] hashIt(MessageDigest md) {
 		// hash it
+		
 		byte[] hash = super.hashIt(md);
 		if (LOG.isDebugEnabled()) {
-			String digest = convertHashToString(hash).toString();
-			LOG.debug("Generated digest: " + digest);
+			String digest = convertHashToString(hash);
+			LOG.debug("Generated digest: " + md.getAlgorithm() + ": " + digest);
 		}
 
 		return hash;

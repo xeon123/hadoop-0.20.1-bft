@@ -244,7 +244,7 @@ public class Sha1Hash extends ShaAbstractHash {
 		// hash it
 		byte[] hash = super.hashIt(md);
 		if (LOG.isDebugEnabled()) {
-			String digest = convertHashToString(hash).toString();
+			String digest = convertHashToString(hash);
 			LOG.debug("Generated digest: " + digest);
 		}
 

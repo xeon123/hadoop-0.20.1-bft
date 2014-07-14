@@ -495,7 +495,7 @@ class ReduceTask extends Task {
 				// set the task is done
 				done(umbilical, reporter, true);
 
-				String digest = new String(Sha1Hash.convertHashToString(generateDigest()));
+				String digest = new String(ShaAbstractHash.convertHashToString(generateDigest()));
 				LOG.info("Final digest " + digest);
 				umbilical.sendDigest(getTaskID(), new String[]{digest});
 				sendLastDone(umbilical, reporter);
@@ -600,10 +600,12 @@ class ReduceTask extends Task {
 		}
 
 		String path = conf.get("mapred.output.dir") + "/" + filename + extension;
-		Sha1Hash hash = new Sha1Hash();
 		byte[] digest = null;
 		try {
-			digest = hash.text(dfs, conf, path);
+			if(shaname.equals("SHA-1"))
+				digest = ((Sha1Hash) hashGen).text(dfs, conf, path);
+			else
+				digest = ((Sha256Hash) hashGen).text(dfs, conf, path);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2988,9 +2990,14 @@ class ReduceTask extends Task {
 					addToMapOutputFilesOnDisk(status);
 				}
 
-				Sha1Hash hash = new Sha1Hash();
-				String digest = hash.generateHashForReduce(rfs, outputPath).toString();
-				LOG.debug("Digest for " + mapId.toString() + " ( " + outputPath.toString() + " ) = " + digest);
+				if(LOG.isDebugEnabled()) {
+					byte[] digest = new byte[0];
+					if (shaname.equals("SHA-1"))
+						digest = ((Sha1Hash) hashGen).generateHashForReduce(rfs, outputPath);
+					else
+						digest = ((Sha256Hash) hashGen).generateHashForReduce(rfs, outputPath);
+					LOG.debug("Digest for " + mapId.toString() + " ( " + outputPath.toString() + " ) = " + ShaAbstractHash.convertHashToString(digest));
+				}
 			}
 		}
 

@@ -2821,7 +2821,7 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 			if(LOG.isDebugEnabled()){
 				String[] digests = new String[digest.length];
 				for (int i = 0; i < digest.length; i++) {
-					digests[i] = Sha1Hash.convertHashToString(digest[i].getBytes()).toString();
+					digests[i] = ShaAbstractHash.convertHashToString(digest[i].getBytes());
 				}
 				LOG.debug("Collected task " + getTaskID(taskid) + ": " + Arrays.deepToString(digests));
 			}

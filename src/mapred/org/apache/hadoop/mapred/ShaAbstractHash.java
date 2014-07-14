@@ -37,8 +37,9 @@ public abstract class ShaAbstractHash {
 				break;
 			case SHA256:
 				digest = "SHA-256";
+				break;
 			default:
-				digest = "NONE";
+				digest = null;
 				break;
 			}
 			return digest;
@@ -55,14 +56,16 @@ public abstract class ShaAbstractHash {
 		return md.digest();
 	}
 
-	
+
 	/**
 	 * Convert a digest into HEX
 	 * @param digest
 	 * @return
 	 */
-	public static StringBuffer convertHashToString(byte[] digest) {
+	public static String convertHashToString(byte[] digest) {
+
 		StringBuffer buf = new StringBuffer();
+
 		// convert hash to HEX
 		for (int i = 0; i < digest.length; i++) {
 			int halfbyte = (digest[i] >>> 4) & 0x0F;
@@ -77,9 +80,20 @@ public abstract class ShaAbstractHash {
 			} while(two_halfs++ < 1);
 		}
 
-		return buf;
+		return buf.toString();
 	}
-	
+
+	public static String convertHash256ToString(byte[] digest) {
+		//convert the byte to hex format method 2
+		StringBuffer hexString = new StringBuffer();
+		for (int i=0;i<digest.length;i++) {
+			hexString.append(Integer.toHexString(0xFF & digest[i]));
+		}
+		
+		return hexString.toString();
+	}
+
+
 	/**
 	 * Generate digests (SHA-1, or SHA-256) for the map tasks
 	 * @param rfs
@@ -89,7 +103,7 @@ public abstract class ShaAbstractHash {
 	 * @return
 	 */
 	public abstract byte[] generateHash(FileSystem rfs, Path filename, int offset, int mapOutputLength);
-	
+
 	/**
 	 * Generate digests (SHA-1, or SHA-256) for the reduce tasks
 	 * @param bis

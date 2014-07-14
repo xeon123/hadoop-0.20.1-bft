@@ -1394,18 +1394,18 @@ class MapTask extends Task {
 				if(codec != null) {
 					if(shaname.equals("SHA-1")) {
 						byte[] hash = ((Sha1Hash) hashGen).generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.partLength);
-						hashList[part] = ShaAbstractHash.convertHashToString(hash).toString();
+						hashList[part] = ShaAbstractHash.convertHashToString(hash);
 					} else {
 						byte[] hash = ((Sha256Hash) hashGen).generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.partLength);
-						hashList[part] = ShaAbstractHash.convertHashToString(hash).toString();
+						hashList[part] = ShaAbstractHash.convertHashToString(hash);
 					}
 				} else {
 					if(shaname.equals("SHA-1")) {
 						byte[] hash = ((Sha1Hash) hashGen).generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.rawLength);
-						hashList[part] = ShaAbstractHash.convertHashToString(hash).toString();
+						hashList[part] = ShaAbstractHash.convertHashToString(hash);
 					} else {
 						byte[] hash = ((Sha256Hash) hashGen).generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.rawLength);
-						hashList[part] = ShaAbstractHash.convertHashToString(hash).toString();
+						hashList[part] = ShaAbstractHash.convertHashToString(hash);
 					}
 				}
 			}
