@@ -82,8 +82,6 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.util.VersionInfo;
 
-import com.baskok.zookeepersample.server.SillyService;
-
 /*******************************************************
  * JobTracker is the central location for submitting and 
  * tracking MR jobs in a network environment.
@@ -160,10 +158,6 @@ JobSubmissionProtocol, TaskTrackerManager, RefreshAuthorizationPolicyProtocol {
 
     public static final Log LOG = LogFactory.getLog(JobTracker.class);
 
-    /**
-     * ZOOKEEPER service
-     */
-    //    private SillyService zk = null;
     /**
      * Start the JobTracker with given configuration.
      * 
@@ -1632,20 +1626,6 @@ JobSubmissionProtocol, TaskTrackerManager, RefreshAuthorizationPolicyProtocol {
         this.infoPort = this.infoServer.getPort();
         this.conf.set("mapred.job.tracker.http.address", infoBindAddress + ":" + this.infoPort); 
         LOG.info("JobTracker webserver: " + this.infoServer.getPort());
-
-
-        //        // start zookeeper
-        //        if(conf.getUseZookeeper()) {
-        //            String zkaddr = conf.getZookeeperAddress();
-        //            try {
-        //                zk = new SillyService();
-        //                LOG.info("Zookeeper webserver: " + zkaddr);
-        //                zk.serve(zkaddr);
-        //            } catch (Exception e) {
-        //                // TODO Auto-generated catch block
-        //                e.printStackTrace();
-        //            }
-        //        }
 
         // start the recovery manager
         recoveryManager = new RecoveryManager();
@@ -3281,10 +3261,6 @@ JobSubmissionProtocol, TaskTrackerManager, RefreshAuthorizationPolicyProtocol {
             JobStatus prevStatus = (JobStatus)job.getStatus().clone();
             LOG.info("Initializing " + job.getJobID());
             job.initTasks();
-
-            // set zookeeper
-            //            if(conf.getUseZookeeper())
-            //                job.setZookeeper(zk);
 
             // Inform the listeners if the job state has changed
             // Note : that the job will be in PREP state.

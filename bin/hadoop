@@ -217,7 +217,7 @@ elif [ "$COMMAND" = "balancer" ] ; then
 elif [ "$COMMAND" = "jobtracker" ] ; then
   CLASS=org.apache.hadoop.mapred.JobTracker
   DEBUG_OPTS="-Xdebug -Xnoagent -Djava.compiler=None -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9009"
-  HADOOP_OPTS="$HADOOP_OPTS $HADOOP_JOBTRACKER_OPTS"
+#  HADOOP_OPTS="$HADOOP_OPTS $HADOOP_JOBTRACKER_OPTS"
   HADOOP_OPTS="$HADOOP_OPTS $HADOOP_JOBTRACKER_OPTS $DEBUG_OPTS"
 elif [ "$COMMAND" = "tasktracker" ] ; then
   CLASS=org.apache.hadoop.mapred.TaskTracker

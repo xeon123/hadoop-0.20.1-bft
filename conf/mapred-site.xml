@@ -47,7 +47,7 @@
 
 <property>
 	<name>hadoop.job.history.user.location</name>
-	<value>/temp/history</value>
+	<value>/tmp/history</value>
 </property>
 <!-- use old api -->
 
@@ -55,11 +55,6 @@
         <name>tasktracker.swap.disk</name>
         <value>true</value>
 </property-->
-
-<property>
-  <name>mapred.tasktracker.map.tasks.maximum</name>
-  <value>3</value>
-</property>
 
 <!--property>
 <name>mapred.compress.map.output</name>
@@ -89,17 +84,17 @@
 
 <property>
   <name>mapred.local.dir</name>
-  <value>/temp</value>
+  <value>/tmp</value>
 </property>
 
 <property>
   <name>hadoop.job.history.location</name>
-  <value>/temp</value>
+  <value>/tmp</value>
 </property>
 
 <property>
   <name>mapred.reduce.tasks</name>
-  <value>3</value>
+  <value>1</value>
 </property>
 
 <property>
@@ -125,26 +120,6 @@
 <property>
   <name>mapred.reduce.slowstart.completed.maps</name>
   <value>0</value>
-</property>
-
-<property>
-  <name>mapred.tasktracker.maps.tasks.maximum</name>
-  <value>20</value>
-</property>
-
-<property>
-  <name>mapred.tasktracker.reduce.tasks.maximum</name>
-  <value>10</value>
-</property>
-
-<property>
-  <name>mapred.map.tasks</name>
-  <value>20</value>
-</property>
-
-<property>
-  <name>mapred.reduce.tasks</name>
-  <value>5</value>
 </property>
 
 <property>

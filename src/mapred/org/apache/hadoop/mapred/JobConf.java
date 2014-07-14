@@ -381,15 +381,6 @@ public class JobConf extends Configuration {
         }
     }
 
-    public boolean getUseZookeeper() {
-        return getBoolean("mapred.job.use.zookeeper", false);
-    }
-
-
-    public String getZookeeperAddress() {
-        return get("mapred.job.zookeeper.address", "127.0.0.1:2181");
-    }
-
     /**
      * Sets the number of tasks that a spawned task JVM should run
      * before it exits

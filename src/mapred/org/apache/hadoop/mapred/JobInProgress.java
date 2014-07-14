@@ -56,7 +56,6 @@ import org.apache.hadoop.net.NetworkTopology;
 import org.apache.hadoop.net.Node;
 import org.apache.hadoop.util.StringUtils;
 
-import com.baskok.zookeepersample.server.SillyService;
 /*************************************************************
  * JobInProgress maintains all the info for keeping
  * a Job on the straight and narrow.  It keeps its JobProfile
@@ -83,7 +82,6 @@ class JobInProgress {
     Path jobFile = null;
     Path localJobFile = null;
     Path localJarFile = null;
-    SillyService zk = null;
 
     TaskInProgress maps[] 		= new TaskInProgress[0];
     TaskInProgress reduces[] 	= new TaskInProgress[0];
@@ -631,7 +629,6 @@ class JobInProgress {
         }
 
         jobtracker.getInstrumentation().addWaiting(getJobID(), numMapTasks + numReduceTasks);
-        zk.writeJobId(getJobID().toString());
         
         maps = new TaskInProgress[replicatedNumMapTasks];
 
@@ -741,10 +738,6 @@ class JobInProgress {
 
         LOG.debug("JobEndProcess starting...");
         endProcess.start();
-    }
-
-    public void setZookeeper(SillyService zk) {
-        this.zk = zk;
     }
 
     private void printMapCache() {
@@ -1237,10 +1230,7 @@ class JobInProgress {
 
         taskEvent.setTaskRunTime((int)(status.getFinishTime() - status.getStartTime()));
         tip.setSuccessEventNumber(taskCompletionEventTracker);
-
-        if(zk != null) {
-            zk.writeDigests(getJobID().toString(), taskid.getTaskID().toString(), Arrays.toString(status.getDigests()));
-        }
+        
         if(!taskid.getTaskID().isSetupOrCleanup())
             voting.addTaskCompletionEvent(taskid.getTaskID(), taskEvent);
         return taskEvent;
