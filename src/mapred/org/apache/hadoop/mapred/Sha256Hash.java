@@ -3,6 +3,7 @@ package org.apache.hadoop.mapred;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.logging.Log;
@@ -18,9 +19,9 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.util.ReflectionUtils;
 
-public class Sha1Hash extends ShaAbstractHash {
+public class Sha256Hash extends ShaAbstractHash {
 
-	private static final Log LOG = LogFactory.getLog(Sha1Hash.class.getName());
+	private static final Log LOG = LogFactory.getLog(Sha256Hash.class.getName());
 
 	public byte[] generateHashForReduce(FileSystem rfs, Path pi) {
 		byte[] digest = null;
@@ -42,52 +43,6 @@ public class Sha1Hash extends ShaAbstractHash {
 
 		return digest;
 	}
-
-	//    /**
-	//     * Generate the digest from the reduce output
-	//     * @param className
-	//     * @param conf
-	//     * @param rfs
-	//     * @param inFile
-	//     * @param outFile
-	//     * @deprecated
-	//     * @return
-	//     */
-	//    public String generateHashForReduce(FileSystem rfs, Path inFile, Path outFile) {
-	//        LOG.debug("Reading file: " + inFile.toString());
-	//        LOG.debug("Writing to file: " + outFile.toString());
-	//
-	//        Path pi = inFile;
-	//        FSDataOutputStream output = null;
-	//        String digest = null;
-	//        try {
-	//            digest = generateHashForReduce(rfs, pi);
-	//
-	//            LOG.debug("Digest for " + inFile + " is " + digest + "\nsaved at " + outFile);
-	//
-	//            // save hash in file
-	//            output = rfs.create(outFile, (short) 1);
-	//            output.write(digest.getBytes(), 0, digest.length());
-	//            output.write("\n".getBytes());
-	//            output.flush();
-	//        } catch (IOException e) {
-	//            e.printStackTrace();
-	//            return null;
-	//        } finally {
-	//            if(output != null) {
-	//                try {
-	//                    output.close();
-	//                } catch (IOException e) {
-	//                    // TODO Auto-generated catch block
-	//                    e.printStackTrace();
-	//                    return null;
-	//                }
-	//            }
-	//        }
-	//
-	//        return digest;
-	//    }
-
 
 	public byte[] generateHash(FileSystem rfs, Path filename, int offset, int mapOutputLength) {
 		LOG.debug("Opening file2: " + filename);
@@ -118,8 +73,12 @@ public class Sha1Hash extends ShaAbstractHash {
 
 		MessageDigest md1 = null;
 		try {
-			md1 = newInstance();
-			
+			try {
+				md1 = MessageDigest.getInstance("SHA-1");
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			int size;
 			byte[] buffer;
 			while (mapOutputLength > 0) {
@@ -185,57 +144,6 @@ public class Sha1Hash extends ShaAbstractHash {
 	}
 
 	/**
-	 * @deprecated
-	 * @param data
-	 */
-	//    public void addDataToHash(byte[] data) {
-	//        ByteArrayInputStream bis = null;
-	//
-	//        if(data == null || data.length == 0)
-	//            return;
-	//
-	//        //        LOG.debug("DATA IS - " + data.length + " - " + mapOutputLength);
-	//        MessageDigest md1 = null;
-	//        int mapOutputLength = data.length;
-	//        try {
-	//            bis = new ByteArrayInputStream(data);
-	//            try {
-	//                md1 = MessageDigest.getInstance("SHA-1");
-	//            } catch (NoSuchAlgorithmException e) {
-	//                // TODO Auto-generated catch block
-	//                e.printStackTrace();
-	//            }
-	//            int size;
-	//            byte[] buffer;
-	//
-	//            while (mapOutputLength > 0) {
-	//                // the case that the bytes read is small the the default size.
-	//                // We don't want that the message digest contains trash.
-	//                size = mapOutputLength < (60 * 1024) ? mapOutputLength : (60*1024);
-	//
-	//                if(size == 0)
-	//                    break;
-	//
-	//                buffer = new byte[size];
-	//                if(bis.read(buffer, 0, size) < 0)
-	//                    break;
-	//
-	//                md1.update(buffer);
-	//                mapOutputLength -= size;
-	//
-	//            }
-	//        } finally {
-	//            if(bis!= null)
-	//                try {
-	//                    bis.close();
-	//                } catch (IOException e) {
-	//                    // TODO Auto-generated catch block
-	//                    e.printStackTrace();
-	//                }
-	//        }
-	//    }
-
-	/**
 	 * Hash it!
 	 * @param md
 	 * @param buf
@@ -252,7 +160,7 @@ public class Sha1Hash extends ShaAbstractHash {
 	}
 
 	private MessageDigest newInstance() {
-		return super.newInstance(Digest.SHA1);
+		return super.newInstance(Digest.SHA256);
 	}
 
 	private class TextRecordInputStream extends InputStream {

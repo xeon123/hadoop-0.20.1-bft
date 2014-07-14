@@ -1748,9 +1748,15 @@ class ReduceTask extends Task {
 
 					if(mapOutput != null && mapOutput.data != null && mapOutput.data.length > 0) {
 						if(codec == null) {
-							digest = hashGen.generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) decompressedLength); // OK
+							if(shaname.equals("SHA-1"))
+								digest = ((Sha1Hash) hashGen).generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) decompressedLength); // OK
+							else
+								digest = ((Sha256Hash) hashGen).generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) decompressedLength); // OK
 						} else {
-							digest = hashGen.generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) compressedLength);
+							if(shaname.equals("SHA-1"))
+								digest = ((Sha1Hash) hashGen).generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) compressedLength);
+							else
+								digest = ((Sha256Hash) hashGen).generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) compressedLength);
 						}
 					}
 				} else {
@@ -1765,10 +1771,17 @@ class ReduceTask extends Task {
 
 					LOG.debug("Generate digest from file: " + mapOutput.getFile().toString());
 
-					if(codec == null)
-						digest = hashGen.generateHash(rfs, mapOutput.getFile(), 0, (int) decompressedLength);// OK
-					else
-						digest = hashGen.generateHash(rfs, mapOutput.getFile(), (int) 0, (int) compressedLength);// OK
+					if(codec == null) {
+						if(shaname.equals("SHA-1"))
+							digest = ((Sha1Hash) hashGen).generateHash(rfs, mapOutput.getFile(), 0, (int) decompressedLength);// OK
+						else
+							digest = ((Sha256Hash) hashGen).generateHash(rfs, mapOutput.getFile(), 0, (int) decompressedLength);// OK
+					} else {
+						if(shaname.equals("SHA-1"))
+							digest = ((Sha1Hash) hashGen).generateHash(rfs, mapOutput.getFile(), (int) 0, (int) compressedLength);// OK
+						else
+							digest = ((Sha256Hash) hashGen).generateHash(rfs, mapOutput.getFile(), (int) 0, (int) compressedLength);// OK
+					}
 				}
 
 				LOG.debug("DIGEST: " + digest.toString());

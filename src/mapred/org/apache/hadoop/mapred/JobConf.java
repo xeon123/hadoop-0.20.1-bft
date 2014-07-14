@@ -351,6 +351,10 @@ public class JobConf extends Configuration {
         return get("keep.task.files.pattern");
     }
 
+    public String getDigestType() {
+        return get("security.digest.type", "SHA-1");
+    }
+    
     /**
      * Set the current working directory for the default file system.
      * 

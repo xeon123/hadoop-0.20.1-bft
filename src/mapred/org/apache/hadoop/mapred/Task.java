@@ -56,7 +56,8 @@ abstract class Task implements Writable, Configurable {
     private static final Log LOG = LogFactory.getLog("org.apache.hadoop.mapred.TaskRunner");
     private static final String SHA_EXTENSION = ".sha";
     private static final String SHA_DIR_NAME  = "_sha";
-    Sha1Hash hashGen;
+    ShaAbstractHash hashGen;
+    String shaname = "";
 
     // Counters used by Task subclasses
     protected static enum Counter {
@@ -461,8 +462,15 @@ abstract class Task implements Writable, Configurable {
         jobContext  = new JobContext(job, id, reporter);
         taskContext = new TaskAttemptContext(job, taskId, reporter);
 
-        hashGen = new Sha1Hash();
-
+        shaname = conf.getDigestType();
+        if (shaname.equals("SHA-1")) {
+        	LOG.info("Using SHA-1 digest");
+        	hashGen = new Sha1Hash();
+        } else if (shaname.equals("SHA-256")) {
+        	LOG.info("Using SHA-256 digest");
+        	hashGen = new Sha256Hash();
+        }
+        
         if (getState() == TaskStatus.State.UNASSIGNED) {
             setState(TaskStatus.State.RUNNING);
         }

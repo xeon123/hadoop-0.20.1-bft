@@ -94,7 +94,7 @@
 
 <property>
   <name>mapred.reduce.tasks</name>
-  <value>1</value>
+  <value>2</value>
 </property>
 
 <property>
@@ -137,6 +137,10 @@
   <value>true</value>
 </property>
 
+<property>
+  <name>security.digest.type</name>
+  <value>SHA-256</value>
+</property>
 <!-- to print the output of the hadoop example -->
 <property>
   <name>jobclient.output.filter</name>
