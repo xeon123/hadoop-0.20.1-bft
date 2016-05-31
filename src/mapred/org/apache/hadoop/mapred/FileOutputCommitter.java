@@ -18,15 +18,15 @@
 
 package org.apache.hadoop.mapred;
 
-import java.io.IOException;
-import java.net.URI;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.StringUtils;
+
+import java.io.IOException;
+import java.net.URI;
 
 /** An {@link OutputCommitter} that commits files specified 
  * in job output directory i.e. ${mapred.output.dir}. 
@@ -38,7 +38,7 @@ public class FileOutputCommitter extends OutputCommitter {
     /**
      * Temporary directory name 
      */
-    private static final String TEMP_DIR_NAME = "_temporary";
+    static final String TEMP_DIR_NAME = "_temporary";
     private static final String SHA_DIR_NAME = "_sha";
 
     public void setupJob(JobContext context) throws IOException {
