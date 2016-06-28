@@ -106,9 +106,9 @@ interface TaskUmbilicalProtocol extends VersionedProtocol {
     void requestMap(TaskAttemptID taskid) throws IOException;
 
     /**
-     * Send an hash to the TT
+     * Send digest to the TT
      * @param taskid
-     * @param hashOutput
+     * @param hash
      * @throws IOException
      * @throws Exception 
      */
