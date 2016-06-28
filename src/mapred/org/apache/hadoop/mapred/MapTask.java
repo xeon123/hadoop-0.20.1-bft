@@ -42,7 +42,8 @@ import org.apache.hadoop.util.*;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
@@ -1315,11 +1316,11 @@ class MapTask extends Task {
                         rec.compressType = writer.getCompressiontype();
                         spillRec.putIndex(rec, parts);
 
-                        //                        LOG.debug("1 - Spill idx " + parts + " - SegmentStart: " + segmentStart
-                        //                                + " Part length: " + rec.partLength
-                        //                                + " Raw length: " + rec.rawLength
-                        //                                + " CompressOutput: " + rec.compressOutput
-                        //                                + " Compression type: " + rec.compressType);
+                        LOG.debug("1 - Spill idx " + parts + " - SegmentStart: " + segmentStart
+                                + " Part length: " + rec.partLength
+                                + " Raw length: " + rec.rawLength
+                                + " CompressOutput: " + rec.compressOutput
+                                + " Compression type: " + rec.compressType);
 
                         writer = null;
                     } finally {
@@ -1357,6 +1358,14 @@ class MapTask extends Task {
             }
         }
 
+        private String[] generateHash(Path finalOutputFile, SpillRecord spillRec) throws IOException {
+
+            LOG.debug("FinalOutputFile: " + finalOutputFile.toString());
+            byte[] bytes = Files.readAllBytes(Paths.get(finalOutputFile.toString()));
+            return generateHash(bytes, spillRec);
+        }
+
+
         /**
          * Generate hash of the output
          * @param finalOutputFile
@@ -1364,43 +1373,19 @@ class MapTask extends Task {
          * @return
          * @throws IOException
          */
-        private String[] generateHash(Path finalOutputFile, SpillRecord spillRec) throws IOException {
+        private String[] generateHash(byte[] bytes, SpillRecord spillRec) throws IOException {
             String[] hashList = new String[spillRec.size()];
-            LOG.debug("Hashing file " + finalOutputFile.toString());
-
-            // cat output
-            if(LOG.isDebugEnabled()) {
-                BufferedReader br = new BufferedReader(new FileReader(finalOutputFile.toString()));
-                try {
-                    StringBuilder sb = new StringBuilder();
-                    String line = br.readLine();
-
-                    while (line != null) {
-                        sb.append(line);
-                        sb.append(System.lineSeparator());
-                        line = br.readLine();
-                    }
-
-                    // Format to octal
-                    BigInteger bi = new BigInteger(sb.toString().getBytes());
-                    String s = bi.toString(8);
-                    LOG.debug("CAT output file: " + s);
-                } finally {
-                    br.close();
-                }
-            }
-
-
+            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 
             for(int spillIdx=0; spillIdx<spillRec.size(); spillIdx++) {
                 IndexRecord index = spillRec.getIndex(spillIdx);
                 LOG.debug("1: HASHING: raw size: " + index.rawLength + " bytes / offset: " + index.startOffset + " partition length: " + index.partLength);
 
                 if(codec != null) {
-                    byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.partLength);
+                    byte[] hash = hashGen.generateHash(bis, (int) index.startOffset, (int) index.partLength);
                     hashList[spillIdx] = ShaAbstractHash.convertHashToString(hash);
                 } else {
-                    byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.rawLength);
+                    byte[] hash = hashGen.generateHash(bis, (int) index.startOffset, (int) index.rawLength);
                     hashList[spillIdx] = ShaAbstractHash.convertHashToString(hash);
                 }
             }
@@ -1602,6 +1587,8 @@ class MapTask extends Task {
                     SpillRecord spillRec  = new SpillRecord(spillIndexFile, job);
                     LOG.debug("1 - Got " + spillRec.size()  + " partitions");
                     LOG.debug("FINALOUT: " + finalOutputFile.toString());
+                    LOG.debug("SPILLINDEXFILE: " + spillIndexFile.toString());
+
                     hash = generateHash(finalOutputFile, spillRec);
 
                     // create index files
@@ -1613,7 +1600,9 @@ class MapTask extends Task {
                     SpillRecord spillRec = indexCacheList.get(0);
                     LOG.debug("2 - Got " + spillRec.size()  + " partitions"); // the size of spillrec is the number of partitions
 
-                    spillRec.writeToFile(new Path(filename[0].getParent(), MapOutputFile.getFileOutIndex()), job);
+                    Path spillIndexFile = new Path(filename[0].getParent(), MapOutputFile.getFileOutIndex());
+                    spillRec.writeToFile(spillIndexFile, job);
+                    LOG.debug("SPILLINDEXFILE2: " + spillIndexFile.toString());
                     hash = generateHash(finalOutputFile, spillRec);
                 }
 
@@ -1677,7 +1666,7 @@ class MapTask extends Task {
 
                     sr.writeToFile(finalIndexFile, job);
 
-                    hash = generateHash(finalOutputFile, sr);
+                    hash = generateHash(new byte[0], sr);
                     sendDigest(hash); // send digests to the job tracker
                 } finally {
                     finalOut.close();
@@ -1700,6 +1689,8 @@ class MapTask extends Task {
                 final SpillRecord spillRec = new SpillRecord(partitions);
                 LOG.debug("3 - Got " + spillRec.size()  + " partitions");
 
+                ByteArrayOutputStream streamForDigest = new ByteArrayOutputStream();
+
                 for (int parts = 0; parts < partitions; parts++) {
                     //create the segments to be merged
                     List<Segment<K,V>> segmentList = new ArrayList<Segment<K, V>>(numSpills);
@@ -1718,6 +1709,49 @@ class MapTask extends Task {
                             new Path(mapId.toString()),
                             job.getOutputKeyComparator(), reporter,
                             null, spilledRecordsCounter);
+
+                    // ###################################################################
+                    // PSC CODE
+                    List<Segment<K,V>> segmentListForDigest = new ArrayList<Segment<K, V>>(numSpills);
+
+                    for(int i = 0; i < numSpills; i++) {
+                        IndexRecord indexRecord = indexCacheList.get(i).getIndex(parts);
+
+                        Segment<K,V> s = new Segment<K,V>(job, rfs, filename[i], indexRecord.startOffset, indexRecord.partLength, codec, true);
+                        segmentListForDigest.add(i, s);
+                    }
+                    RawKeyValueIterator kvIterForDigests = Merger.merge(job, rfs,
+                            keyClass, valClass, codec,
+                            segmentListForDigest, job.getInt("io.sort.factor", 100),
+                            new Path(mapId.toString()),
+                            job.getOutputKeyComparator(), reporter,
+                            null, spilledRecordsCounter);
+
+
+                    DataOutputStream digestDataOut = new DataOutputStream(streamForDigest);
+
+                    while(kvIterForDigests.next()) {
+                        DataInputBuffer key = kvIterForDigests.getKey();
+                        DataInputBuffer value = kvIterForDigests.getValue();
+
+                        int keyLength = key.getLength() - key.getPosition();
+                        if (keyLength < 0) {
+                            throw new IOException("Negative key-length not allowed: " + keyLength + " for " + key);
+                        }
+
+                        int valueLength = value.getLength() - value.getPosition();
+                        if (valueLength < 0) {
+                            throw new IOException("Negative value-length not allowed: " + valueLength + " for " + value);
+                        }
+
+
+                        WritableUtils.writeVInt(digestDataOut, keyLength);
+                        WritableUtils.writeVInt(digestDataOut, valueLength);
+                        streamForDigest.write(key.getData(), key.getPosition(), keyLength);
+                        streamForDigest.write(value.getData(), value.getPosition(), valueLength);
+                    }
+
+                    // ###################################################################3
 
                     //write merged output to disk
                     long segmentStart = finalOut.getPos();
@@ -1758,7 +1792,10 @@ class MapTask extends Task {
 
                 FileStatus status = rfs.getFileStatus(finalOutputFile);
                 LOG.debug("Created " + finalOutputFile + " with size " + status.getLen() + " (" + status.getBlockSize() + ")");
-                hash = generateHash(finalOutputFile, spillRec);
+
+
+
+                hash = generateHash(streamForDigest.toByteArray(), spillRec);
 
                 if(umbilical.shouldTamper(getTaskID(), TAMPERDATA)) {
                     LOG.debug(getTaskID().getTaskID().toString() + " has file tampered.");
