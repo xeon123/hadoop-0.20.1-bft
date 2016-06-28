@@ -117,7 +117,7 @@ class MapTask extends Task {
 		StringBuffer res = new StringBuffer();
 
 		for(String l : locations)
-			res.append(l + ", ");
+			res.append(l).append(", ");
 
 		return res.toString();
 	}
@@ -312,8 +312,8 @@ class MapTask extends Task {
 				skipWriter = 
 						SequenceFile.createWriter(
 								skipFile.getFileSystem(conf), conf, skipFile,
-								(Class<K>) createKey().getClass(),
-								(Class<V>) createValue().getClass(), 
+								createKey().getClass(),
+								createValue().getClass(),
 								CompressionType.BLOCK, getTaskReporter());
 			}
 			skipWriter.append(key, value);
@@ -617,14 +617,14 @@ class MapTask extends Task {
 		try	{
 			Constructor<org.apache.hadoop.mapreduce.Mapper.Context> contextConstructor =
 					org.apache.hadoop.mapreduce.Mapper.Context.class.getConstructor
-					(new Class[]{org.apache.hadoop.mapreduce.Mapper.class,
+					(org.apache.hadoop.mapreduce.Mapper.class,
 							Configuration.class,
 							org.apache.hadoop.mapreduce.TaskAttemptID.class,
 							org.apache.hadoop.mapreduce.RecordReader.class,
 							org.apache.hadoop.mapreduce.RecordWriter.class,
 							org.apache.hadoop.mapreduce.OutputCommitter.class,
 							org.apache.hadoop.mapreduce.StatusReporter.class,
-							org.apache.hadoop.mapreduce.InputSplit.class});
+							org.apache.hadoop.mapreduce.InputSplit.class);
 
 			// get an output object
 			if (job.getNumReduceTasks() == 0) {
@@ -657,9 +657,9 @@ class MapTask extends Task {
 	}
 
 	interface MapOutputCollector<K, V> {
-		public void collect(K key, V value, int partition) throws IOException, InterruptedException;
-		public void close() throws IOException, InterruptedException;
-		public void flush() throws IOException, InterruptedException, ClassNotFoundException;
+		void collect(K key, V value, int partition) throws IOException, InterruptedException;
+		void close() throws IOException, InterruptedException;
+		void flush() throws IOException, InterruptedException, ClassNotFoundException;
 	}
 
 	/**
@@ -1379,8 +1379,8 @@ class MapTask extends Task {
 
 		/**
 		 * Generate hash SHA-1
-		 * @param path
-		 * @param mapOutputLength
+		 * @param finalOutputFile
+		 * @param spillRec
 		 * @return
 		 * @throws IOException 
 		 */
@@ -1393,18 +1393,18 @@ class MapTask extends Task {
 
 				if(codec != null) {
 					if(shaname.equals("SHA-1")) {
-						byte[] hash = ((Sha1Hash) hashGen).generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.partLength);
+						byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.partLength);
 						hashList[part] = ShaAbstractHash.convertHashToString(hash);
 					} else {
-						byte[] hash = ((Sha256Hash) hashGen).generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.partLength);
+						byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.partLength);
 						hashList[part] = ShaAbstractHash.convertHashToString(hash);
 					}
 				} else {
 					if(shaname.equals("SHA-1")) {
-						byte[] hash = ((Sha1Hash) hashGen).generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.rawLength);
+						byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.rawLength);
 						hashList[part] = ShaAbstractHash.convertHashToString(hash);
 					} else {
-						byte[] hash = ((Sha256Hash) hashGen).generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.rawLength);
+						byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.rawLength);
 						hashList[part] = ShaAbstractHash.convertHashToString(hash);
 					}
 				}

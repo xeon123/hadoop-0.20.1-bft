@@ -37,7 +37,7 @@ public class TaskCompletionEvent
 implements Writable {
 	Logger log = Logger.getLogger(TaskCompletionEvent.class);
 
-	static public enum Status {FAILED, KILLED, SUCCEEDED, OBSOLETE, TIPFAILED};
+	public enum Status {FAILED, KILLED, SUCCEEDED, OBSOLETE, TIPFAILED}
 
 	private int eventId; 
 	private String taskTrackerHttp;

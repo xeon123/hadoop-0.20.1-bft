@@ -403,7 +403,7 @@ public class InputSampler<K,V> implements Tool {
 		for (String s : otherArgs) {
 			FileInputFormat.addInputPath(job, new Path(s));
 		}
-		InputSampler.<K,V>writePartitionFile(job, sampler);
+		InputSampler.writePartitionFile(job, sampler);
 
 		return 0;
 	}

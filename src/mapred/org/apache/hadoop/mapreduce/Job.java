@@ -37,7 +37,7 @@ import org.apache.hadoop.mapred.TaskCompletionEvent;
 public class Job extends JobContext {
 
 	// State of the jobs
-	public static enum JobState {DEFINE, RUNNING};
+	public enum JobState {DEFINE, RUNNING}
 
 
 	private JobState state = JobState.DEFINE;

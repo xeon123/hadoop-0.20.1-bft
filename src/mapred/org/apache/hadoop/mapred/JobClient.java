@@ -17,49 +17,15 @@
  */
 package org.apache.hadoop.mapred;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.security.auth.login.LoginException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.filecache.DistributedCache;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.*;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.permission.FsPermission;
-import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.DataOutputBuffer;
-import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableUtils;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.io.serializer.SerializationFactory;
 import org.apache.hadoop.io.serializer.Serializer;
 import org.apache.hadoop.ipc.RPC;
@@ -71,6 +37,14 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+
+import javax.security.auth.login.LoginException;
+import java.io.*;
+import java.net.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * <code>JobClient</code> is the primary interface for the user-job to interact
@@ -157,7 +131,7 @@ import org.apache.hadoop.util.ToolRunner;
  */
 public class JobClient extends Configured implements MRConstants, Tool  {
 	private static final Log LOG = LogFactory.getLog(JobClient.class);
-	public static enum TaskStatusFilter { NONE, KILLED, FAILED, SUCCEEDED, ALL }
+	public enum TaskStatusFilter { NONE, KILLED, FAILED, SUCCEEDED, ALL }
 	private TaskStatusFilter taskOutputFilter = TaskStatusFilter.FAILED; 
 	private static final long MAX_JOBPROFILE_AGE = 1000 * 2;
 
@@ -508,10 +482,7 @@ public class JobClient extends Configured implements MRConstants, Tool  {
 			return false;
 		}
 		//check for ports
-		if (srcUri.getPort() != dstUri.getPort()) {
-			return false;
-		}
-		return true;
+		return srcUri.getPort() == dstUri.getPort();
 	}
 
 	// copies a file to the jobtracker filesystem and returns the path where it
@@ -543,7 +514,9 @@ public class JobClient extends Configured implements MRConstants, Tool  {
 	/**
 	 * Configure the jobconf of the user with the command line options of 
 	 * -libjars, -files, -archives
-	 * @param conf
+	 * @param job
+	 * @param submitJobDir
+	 * @param submitJarFile
 	 * @throws IOException
 	 */
 	private void configureCommandLineOptions(JobConf job, Path submitJobDir, Path submitJarFile) 
@@ -719,9 +692,8 @@ public class JobClient extends Configured implements MRConstants, Tool  {
 	 * @throws InvalidJobConfException
 	 * @throws IOException
 	 */
-	public RunningJob submitJob(String jobFile) throws FileNotFoundException, 
-	InvalidJobConfException, 
-	IOException {
+	public RunningJob submitJob(String jobFile) throws
+			IOException {
 		// Load in the submitted job details
 		JobConf job = new JobConf(jobFile);
 		return submitJob(job);
@@ -747,8 +719,8 @@ public class JobClient extends Configured implements MRConstants, Tool  {
 	 * @throws IOException
 	 */
 	public RunningJob submitJob(JobConf job)
-	throws FileNotFoundException,
-	IOException {
+	throws
+			IOException {
 		try {
 			return submitJobInternal(job);
 		} catch (InterruptedException ie) {
@@ -768,8 +740,8 @@ public class JobClient extends Configured implements MRConstants, Tool  {
 	 * @throws IOException
 	 */
 	public RunningJob submitJobInternal(JobConf job) 
-	throws FileNotFoundException, 
-	ClassNotFoundException,
+	throws
+			ClassNotFoundException,
 	InterruptedException,
 	IOException {
 		/*

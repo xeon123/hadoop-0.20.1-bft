@@ -55,7 +55,7 @@ interface TaskUmbilicalProtocol extends VersionedProtocol {
      * Version 16 Added fatalError for child to communicate fatal errors to TT
      * */
 
-    public static final long versionID = 16L;
+    long versionID = 16L;
 
     /**
      * Called when a child task process starts, to get its task.

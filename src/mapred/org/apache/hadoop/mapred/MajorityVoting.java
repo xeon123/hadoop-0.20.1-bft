@@ -1,16 +1,9 @@
 package org.apache.hadoop.mapred;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.*;
 
 public class MajorityVoting implements VotingSystem {
     private static final Log LOG = LogFactory.getLog(MajorityVoting.class);
@@ -21,14 +14,14 @@ public class MajorityVoting implements VotingSystem {
 
     // mapHashList is a list where TaskID is the id and String[] is an array off hashes of a task. The hashes saved
     // contains the partition
-    private Map<String, List<String>> mapHashList = Collections.synchronizedMap(new HashMap<String, List<String>>());
-    private Map<String, List<String>> redHashList = Collections.synchronizedMap(new HashMap<String, List<String>>());
-    private Map<String, List<String>> firstMapHash= Collections.synchronizedMap(new HashMap<String, List<String>>());
+    private Map<String, List<String>> mapHashList = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, List<String>> redHashList = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, List<String>> firstMapHash= Collections.synchronizedMap(new HashMap<>());
 
     private Map<String, List<TaskCompletionEvent>> buffer = new HashMap<String, List<TaskCompletionEvent>>();
-    private Map<String, List<TaskID>> maptaskList = Collections.synchronizedMap(new HashMap<String, List<TaskID>>());
-    private Map<String, List<TaskID>> redtaskList = Collections.synchronizedMap(new HashMap<String, List<TaskID>>());
-    private List<TaskCompletionEvent> first = new ArrayList<TaskCompletionEvent>();
+    private Map<String, List<TaskID>> maptaskList = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, List<TaskID>> redtaskList = Collections.synchronizedMap(new HashMap<>());
+    private List<TaskCompletionEvent> first = new ArrayList<>();
 
     public static final int NO_MAJORITY=-1;
     public static final int NOT_ENOUGH_ELEMENTS=-2;
@@ -180,7 +173,6 @@ public class MajorityVoting implements VotingSystem {
     /**
      * Add a <task without replica, List<task>> for map
      * Is to help to count the map digests 
-     * @param id
      * @param task
      */
     private void addTask(TaskID task) {
@@ -241,9 +233,7 @@ public class MajorityVoting implements VotingSystem {
 
     /**
      * 
-     * @param id Id of the reduce task
-     * @param threshold
-     * @param tasksNumber
+     * @param tid Id of the reduce task
      * @return
      */
     public int hasMajorityOfDigests(TaskID tid) {
@@ -366,34 +356,6 @@ public class MajorityVoting implements VotingSystem {
 
         return NO_MAJORITY;
     }
-
-
-    /**
-     * Get the digest that has more occurrences
-     * @param digests
-     * @return the digest
-     */
-    private String getDigests(List<String> digests) {
-        if(digests == null)
-            return null;
-
-        for(int i=0; i<digests.size(); i++) {
-            String key = digests.get(i);
-            int count = 1;
-
-            for(int j=i+1; j<digests.size(); j++) {
-                if(key.equals(digests.get(j))) {
-                    count++;
-
-                    if(count >= getThreshold())
-                        return key;
-                }
-            }
-        }
-
-        return null;
-    }
-
 
 
     private int hasMajorityOfDigests(String ref, List<String> digests) {

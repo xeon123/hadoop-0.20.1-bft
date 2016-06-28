@@ -38,7 +38,7 @@
     TaskID tipidObj = TaskID.forName(tipid);
     TaskAttemptID taskidObj = TaskAttemptID.forName(taskid);
     
-    JobInProgress job = (JobInProgress) tracker.getJob(jobidObj);
+    JobInProgress job = tracker.getJob(jobidObj);
     
     boolean privateActions = JSPUtil.conf.getBoolean(PRIVATE_ACTIONS_KEY,
         false);

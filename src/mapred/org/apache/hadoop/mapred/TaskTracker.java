@@ -117,7 +117,7 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 	static final long WAIT_FOR_DONE = 3 * 1000;
 	private final int httpPort;
 
-	static enum State {NORMAL, STALE, INTERRUPTED, DENIED}
+	enum State {NORMAL, STALE, INTERRUPTED, DENIED}
 
 	static{
 		Configuration.addDefaultResource("mapred-default.xml");
@@ -354,7 +354,7 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 
 			// create a running job
 			if (!runningJobs.containsKey(jobId)) {
-				boolean keep = this.fConf.getBoolean("mapred.keep.job.files", false);
+				boolean keep = fConf.getBoolean("mapred.keep.job.files", false);
 				rJob = new RunningJob(jobId, keep);
 				rJob.localized = false;
 				rJob.tasksSet = new HashSet<TaskInProgress>();
@@ -454,7 +454,7 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 		}
 
 		//check local disk
-		checkLocalDirs(this.fConf.getLocalDirs());		
+		checkLocalDirs(fConf.getLocalDirs());
 		fConf.deleteLocalFiles(SUBDIR);
 
 		// Clear out state tables
@@ -466,16 +466,16 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 		this.acceptNewTasks = true;
 		this.ttstatus 	  = null;
 
-		this.minSpaceStart = this.fConf.getLong("mapred.local.dir.minspacestart", 0L);
-		this.minSpaceKill  = this.fConf.getLong("mapred.local.dir.minspacekill",  0L);
+		this.minSpaceStart = fConf.getLong("mapred.local.dir.minspacestart", 0L);
+		this.minSpaceKill  = fConf.getLong("mapred.local.dir.minspacekill",  0L);
 
 		//tweak the probe sample size (make it a function of numCopiers)
-		probe_sample_size = this.fConf.getInt("mapred.tasktracker.events.batchsize", 500);
+		probe_sample_size = fConf.getInt("mapred.tasktracker.events.batchsize", 500);
 
 		Class<? extends TaskTrackerInstrumentation> metricsInst = getInstrumentationClass(fConf);
 		try {
 			java.lang.reflect.Constructor<? extends TaskTrackerInstrumentation> c =
-					metricsInst.getConstructor(new Class[] {TaskTracker.class} );
+					metricsInst.getConstructor(TaskTracker.class);
 			this.myInstrumentation = c.newInstance(this);
 		} catch(Exception e) {
 			//Reflection can throw lots of exceptions -- handle them all by 
@@ -498,26 +498,26 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 		this.jvmManager = new JvmManager(this);
 
 		// Set service-level authorization security policy
-		if (this.fConf.getBoolean(ServiceAuthorizationManager.SERVICE_AUTHORIZATION_CONFIG, false)) {
-			PolicyProvider policyProvider = 
-					(PolicyProvider)(ReflectionUtils.newInstance(
-							this.fConf.getClass(PolicyProvider.POLICY_PROVIDER_CONFIG, 
-									MapReducePolicyProvider.class, PolicyProvider.class), 
-									this.fConf));
+		if (fConf.getBoolean(ServiceAuthorizationManager.SERVICE_AUTHORIZATION_CONFIG, false)) {
+			PolicyProvider policyProvider =
+					ReflectionUtils.newInstance(
+							this.fConf.getClass(PolicyProvider.POLICY_PROVIDER_CONFIG,
+									MapReducePolicyProvider.class, PolicyProvider.class),
+									this.fConf);
 
-			SecurityUtil.setPolicy(new ConfiguredPolicy(this.fConf, policyProvider));
+			SecurityUtil.setPolicy(new ConfiguredPolicy(fConf, policyProvider));
 		}
 
 		// RPC initialization
 		int max = maxCurrentMapTasks > maxCurrentReduceTasks ? maxCurrentMapTasks : maxCurrentReduceTasks;
 
 		//set the num handlers to max*2 since canCommit may wait for the duration of a heartbeat RPC
-		this.taskReportServer = RPC.getServer(this, bindAddress, tmpPort, 2 * max, false, this.fConf);
+		this.taskReportServer = RPC.getServer(this, bindAddress, tmpPort, 2 * max, false, fConf);
 		this.taskReportServer.start();
 
 		// get the assigned address
 		this.taskReportAddress = taskReportServer.getListenerAddress();
-		this.fConf.set("mapred.task.tracker.report.address", taskReportAddress.getHostName() + ":" + taskReportAddress.getPort());
+		fConf.set("mapred.task.tracker.report.address", taskReportAddress.getHostName() + ":" + taskReportAddress.getPort());
 
 		LOG.info("TaskTracker up at: " + this.taskReportAddress);
 
@@ -525,11 +525,11 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 		LOG.info("Starting tracker " + taskTrackerName);
 
 		// Clear out temporary files that might be lying around
-		DistributedCache.purgeCache(this.fConf);
+		DistributedCache.purgeCache(fConf);
 		cleanupStorage();
 
 		this.jobClient = (InterTrackerProtocol) 
-				RPC.waitForProxy(InterTrackerProtocol.class, InterTrackerProtocol.versionID, jobTrackAddr, this.fConf);
+				RPC.waitForProxy(InterTrackerProtocol.class, InterTrackerProtocol.versionID, jobTrackAddr, fConf);
 
 		this.justInited = true;
 		this.running = true;    
@@ -542,7 +542,7 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 
 		initializeMemoryManagement();
 
-		this.indexCache = new IndexCache(this.fConf);
+		this.indexCache = new IndexCache(fConf);
 
 		mapLauncher = new TaskLauncher(maxCurrentMapTasks);
 		reduceLauncher = new TaskLauncher(maxCurrentReduceTasks);
@@ -566,7 +566,7 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 	 */
 	public void cleanupStorage() throws IOException {
 		if(!fConf.getKeepJobFiles())
-			this.fConf.deleteLocalFiles();
+			fConf.deleteLocalFiles();
 	}
 
 	// Object on wait which MapEventsFetcherThread is going to wait.
@@ -589,7 +589,7 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 					for (TaskInProgress tip : rjob.tasksSet) {
 						Task task = tip.getTask();
 						if (!task.isMapTask()) {// reduce task
-							if (((ReduceTask)task).getPhase() == TaskStatus.Phase.SHUFFLE) {
+							if (task.getPhase() == TaskStatus.Phase.SHUFFLE) {
 								if (rjob.getFetchStatus() == null) {
 									//this is a new job; we start fetching its map events
 									f = new FetchStatus(jobId, ((ReduceTask)task).getNumMaps());
@@ -1811,7 +1811,7 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 	private TaskInProgress registerTask(LaunchTaskAction action, TaskLauncher launcher) {
 		Task t = action.getTask();
 
-		TaskInProgress tip = new TaskInProgress(t, this.fConf, launcher);
+		TaskInProgress tip = new TaskInProgress(t, fConf, launcher);
 		LOG.info("Registering Task " + t.getTaskID() + " task's state:" + t.getState());
 
 		synchronized (this) {
@@ -3464,7 +3464,7 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 						null, MemoryCalculatorPlugin.class);
 
 		MemoryCalculatorPlugin memoryCalculatorPlugin =
-				(MemoryCalculatorPlugin) MemoryCalculatorPlugin
+				MemoryCalculatorPlugin
 				.getMemoryCalculatorPlugin(clazz, fConf);
 		LOG.info(" Using MemoryCalculatorPlugin : " + memoryCalculatorPlugin);
 
@@ -3501,12 +3501,12 @@ implements MRConstants, TaskUmbilicalProtocol, Runnable {
 		if (totalMemoryAllottedForTasks < 0) {
 			//adding check for the old keys which might be used by the administrator
 			//while configuration of the memory monitoring on TT
-			long memoryAllotedForSlot = fConf.normalizeMemoryConfigValue(
-					fConf.getLong(JobConf.MAPRED_TASK_DEFAULT_MAXVMEM_PROPERTY, 
+			long memoryAllotedForSlot = JobConf.normalizeMemoryConfigValue(
+					fConf.getLong(JobConf.MAPRED_TASK_DEFAULT_MAXVMEM_PROPERTY,
 							JobConf.DISABLED_MEMORY_LIMIT));
 
-			long limitVmPerTask = fConf.normalizeMemoryConfigValue(
-					fConf.getLong(JobConf.UPPER_LIMIT_ON_TASK_VMEM_PROPERTY, 
+			long limitVmPerTask = JobConf.normalizeMemoryConfigValue(
+					fConf.getLong(JobConf.UPPER_LIMIT_ON_TASK_VMEM_PROPERTY,
 							JobConf.DISABLED_MEMORY_LIMIT));
 
 			if(memoryAllotedForSlot == JobConf.DISABLED_MEMORY_LIMIT) {

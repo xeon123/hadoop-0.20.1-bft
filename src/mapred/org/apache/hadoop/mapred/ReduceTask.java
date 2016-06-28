@@ -256,7 +256,7 @@ class ReduceTask extends Task {
 
 		StringBuffer res = new StringBuffer();
 		for(Path p : fileList) {
-			res.append(p + ", ");
+			res.append(p).append(", ");
 		}
 
 
@@ -495,7 +495,7 @@ class ReduceTask extends Task {
 				// set the task is done
 				done(umbilical, reporter, true);
 
-				String digest = new String(ShaAbstractHash.convertHashToString(generateDigest()));
+				String digest = ShaAbstractHash.convertHashToString(generateDigest());
 				LOG.info("Final digest " + digest);
 				umbilical.sendDigest(getTaskID(), new String[]{digest});
 				sendLastDone(umbilical, reporter);
@@ -1705,8 +1705,8 @@ class ReduceTask extends Task {
 							+ " compressed len: " + compressedLength + ", decompressed len: " + decompressedLength);
 					return null;
 				}
-				int forReduce = (int)Integer.parseInt(connection.getHeaderField(FOR_REDUCE_TASK));
-				int startOffset = (int)Integer.parseInt(connection.getHeaderField(START_OFFSET));
+				int forReduce = Integer.parseInt(connection.getHeaderField(FOR_REDUCE_TASK));
+				int startOffset = Integer.parseInt(connection.getHeaderField(START_OFFSET));
 
 				if (forReduce != reduce) {
 					LOG.warn("data for the wrong reduce: " + forReduce +
@@ -1751,14 +1751,14 @@ class ReduceTask extends Task {
 					if(mapOutput != null && mapOutput.data != null && mapOutput.data.length > 0) {
 						if(codec == null) {
 							if(shaname.equals("SHA-1"))
-								digest = ((Sha1Hash) hashGen).generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) decompressedLength); // OK
+								digest = hashGen.generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) decompressedLength); // OK
 							else
-								digest = ((Sha256Hash) hashGen).generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) decompressedLength); // OK
+								digest = hashGen.generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) decompressedLength); // OK
 						} else {
 							if(shaname.equals("SHA-1"))
-								digest = ((Sha1Hash) hashGen).generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) compressedLength);
+								digest = hashGen.generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) compressedLength);
 							else
-								digest = ((Sha256Hash) hashGen).generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) compressedLength);
+								digest = hashGen.generateHash(new ByteArrayInputStream(mapOutput.data), 0, (int) compressedLength);
 						}
 					}
 				} else {
@@ -1775,14 +1775,14 @@ class ReduceTask extends Task {
 
 					if(codec == null) {
 						if(shaname.equals("SHA-1"))
-							digest = ((Sha1Hash) hashGen).generateHash(rfs, mapOutput.getFile(), 0, (int) decompressedLength);// OK
+							digest = hashGen.generateHash(rfs, mapOutput.getFile(), 0, (int) decompressedLength);// OK
 						else
-							digest = ((Sha256Hash) hashGen).generateHash(rfs, mapOutput.getFile(), 0, (int) decompressedLength);// OK
+							digest = hashGen.generateHash(rfs, mapOutput.getFile(), 0, (int) decompressedLength);// OK
 					} else {
 						if(shaname.equals("SHA-1"))
-							digest = ((Sha1Hash) hashGen).generateHash(rfs, mapOutput.getFile(), (int) 0, (int) compressedLength);// OK
+							digest = hashGen.generateHash(rfs, mapOutput.getFile(), 0, (int) compressedLength);// OK
 						else
-							digest = ((Sha256Hash) hashGen).generateHash(rfs, mapOutput.getFile(), (int) 0, (int) compressedLength);// OK
+							digest = hashGen.generateHash(rfs, mapOutput.getFile(), 0, (int) compressedLength);// OK
 					}
 				}
 

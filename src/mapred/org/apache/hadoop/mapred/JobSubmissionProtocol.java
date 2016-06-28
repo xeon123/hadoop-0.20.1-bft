@@ -59,86 +59,86 @@ interface JobSubmissionProtocol extends VersionedProtocol {
 	 * Version 20: Modified ClusterStatus to have the tasktracker expiry
 	 *             interval for HADOOP-4939                     
 	 */
-	public static final long versionID = 20L;
+	long versionID = 20L;
 
 	/**
 	 * Allocate a name for the job.
 	 * @return a unique job name for submitting jobs.
 	 * @throws IOException
 	 */
-	public JobID getNewJobId() throws IOException;
+	JobID getNewJobId() throws IOException;
 
 	/**
 	 * Submit a Job for execution.  Returns the latest profile for
 	 * that job.
 	 * The job files should be submitted in <b>system-dir</b>/<b>jobName</b>.
 	 */
-	public JobStatus submitJob(JobID jobName) throws IOException;
+	JobStatus submitJob(JobID jobName) throws IOException;
 
 	/**
 	 * Get the current status of the cluster
 	 * @param detailed if true then report tracker names as well
 	 * @return summary of the state of the cluster
 	 */
-	public ClusterStatus getClusterStatus(boolean detailed) throws IOException;
+	ClusterStatus getClusterStatus(boolean detailed) throws IOException;
 
 
 	/**
 	 * Kill the indicated job
 	 */
-	public void killJob(JobID jobid) throws IOException;
+	void killJob(JobID jobid) throws IOException;
 
 	/**
 	 * Set the priority of the specified job
 	 * @param jobid ID of the job
 	 * @param priority Priority to be set for the job
 	 */
-	public void setJobPriority(JobID jobid, String priority) 
+	void setJobPriority(JobID jobid, String priority)
 	throws IOException;
 	/**
 	 * Kill indicated task attempt.
 	 * @param taskId the id of the task to kill.
 	 * @param shouldFail if true the task is failed and added to failed tasks list, otherwise
 	 * it is just killed, w/o affecting job failure status.  
-	 */ 
-	public boolean killTask(TaskAttemptID taskId, boolean shouldFail) throws IOException;
+	 */
+	boolean killTask(TaskAttemptID taskId, boolean shouldFail) throws IOException;
 
 	/**
 	 * Grab a handle to a job that is already known to the JobTracker.
 	 * @return Profile of the job, or null if not found. 
 	 */
-	public JobProfile getJobProfile(JobID jobid) throws IOException;
+	JobProfile getJobProfile(JobID jobid) throws IOException;
 
 	/**
 	 * Grab a handle to a job that is already known to the JobTracker.
 	 * @return Status of the job, or null if not found.
 	 */
-	public JobStatus getJobStatus(JobID jobid) throws IOException;
+	JobStatus getJobStatus(JobID jobid) throws IOException;
 
 	/**
 	 * Grab the current job counters
 	 */
-	public Counters getJobCounters(JobID jobid) throws IOException;
+	Counters getJobCounters(JobID jobid) throws IOException;
 
 	/**
 	 * Grab a bunch of info on the map tasks that make up the job
 	 */
-	public TaskReport[] getMapTaskReports(JobID jobid) throws IOException;
+	TaskReport[] getMapTaskReports(JobID jobid) throws IOException;
 
 	/**
 	 * Grab a bunch of info on the reduce tasks that make up the job
 	 */
-	public TaskReport[] getReduceTaskReports(JobID jobid) throws IOException;
+	TaskReport[] getReduceTaskReports(JobID jobid) throws IOException;
 
 	/**
 	 * Grab a bunch of info on the cleanup tasks that make up the job
 	 */
-	public TaskReport[] getCleanupTaskReports(JobID jobid) throws IOException;
+	TaskReport[] getCleanupTaskReports(JobID jobid) throws IOException;
 
 	/**
 	 * Grab a bunch of info on the setup tasks that make up the job
 	 */
-	public TaskReport[] getSetupTaskReports(JobID jobid) throws IOException;
+	TaskReport[] getSetupTaskReports(JobID jobid) throws IOException;
 
 	/**
 	 * A MapReduce system always operates on a single filesystem.  This 
@@ -146,20 +146,20 @@ interface JobSubmissionProtocol extends VersionedProtocol {
 	 * if dfs).  The client can then copy files into the right locations 
 	 * prior to submitting the job.
 	 */
-	public String getFilesystemName() throws IOException;
+	String getFilesystemName() throws IOException;
 
 	/** 
 	 * Get the jobs that are not completed and not failed
 	 * @return array of JobStatus for the running/to-be-run
 	 * jobs.
 	 */
-	public JobStatus[] jobsToComplete() throws IOException;
+	JobStatus[] jobsToComplete() throws IOException;
 
 	/** 
 	 * Get all the jobs submitted. 
 	 * @return array of JobStatus for the submitted jobs
 	 */
-	public JobStatus[] getAllJobs() throws IOException;
+	JobStatus[] getAllJobs() throws IOException;
 
 	/**
 	 * Get task completion events for the jobid, starting from fromEventId. 
@@ -170,14 +170,14 @@ interface JobSubmissionProtocol extends VersionedProtocol {
 	 * @return array of task completion events. 
 	 * @throws IOException
 	 */
-	public TaskCompletionEvent[] getTaskCompletionEvents(JobID jobid, int fromEventId, int maxEvents) throws IOException;
+	TaskCompletionEvent[] getTaskCompletionEvents(JobID jobid, int fromEventId, int maxEvents) throws IOException;
 
 	/**
 	 * Get the diagnostics for a given task in a given job
 	 * @param taskId the id of the task
 	 * @return an array of the diagnostic messages
 	 */
-	public String[] getTaskDiagnostics(TaskAttemptID taskId) 
+	String[] getTaskDiagnostics(TaskAttemptID taskId)
 	throws IOException;
 
 	/**
@@ -185,7 +185,7 @@ interface JobSubmissionProtocol extends VersionedProtocol {
 	 * 
 	 * @return the system directory where job-specific files are to be placed.
 	 */
-	public String getSystemDir();  
+	String getSystemDir();
 
 	/**
 	 * Gets set of Job Queues associated with the Job Tracker
@@ -193,7 +193,7 @@ interface JobSubmissionProtocol extends VersionedProtocol {
 	 * @return Array of the Job Queue Information Object
 	 * @throws IOException 
 	 */
-	public JobQueueInfo[] getQueues() throws IOException;
+	JobQueueInfo[] getQueues() throws IOException;
 
 	/**
 	 * Gets scheduling information associated with the particular Job queue
@@ -202,7 +202,7 @@ interface JobSubmissionProtocol extends VersionedProtocol {
 	 * @return Scheduling Information of the Queue
 	 * @throws IOException 
 	 */
-	public JobQueueInfo getQueueInfo(String queue) throws IOException;
+	JobQueueInfo getQueueInfo(String queue) throws IOException;
 
 	/**
 	 * Gets all the jobs submitted to the particular Queue
@@ -210,5 +210,5 @@ interface JobSubmissionProtocol extends VersionedProtocol {
 	 * @return array of JobStatus for the submitted jobs
 	 * @throws IOException
 	 */
-	public JobStatus[] getJobsFromQueue(String queue) throws IOException;
+	JobStatus[] getJobsFromQueue(String queue) throws IOException;
 }

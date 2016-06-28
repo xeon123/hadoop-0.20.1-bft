@@ -230,7 +230,7 @@ public class TaskLog {
 	/**
 	 * The filter for userlogs.
 	 */
-	public static enum LogName {
+	public enum LogName {
 		/** Log on the stdout of the task. */
 		STDOUT ("stdout"),
 
@@ -248,7 +248,7 @@ public class TaskLog {
 
 		private String prefix;
 
-		private LogName(String prefix) {
+		LogName(String prefix) {
 			this.prefix = prefix;
 		}
 

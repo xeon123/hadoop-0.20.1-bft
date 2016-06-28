@@ -105,7 +105,7 @@ public class JobHistory {
      * Record types are identifiers for each line of log in history files. 
      * A record type appears as the first token in a single line of log. 
      */
-    public static enum RecordTypes {
+    public enum RecordTypes {
         Jobtracker, Job, Task, MapAttempt, ReduceAttempt, Meta
     }
 
@@ -113,7 +113,7 @@ public class JobHistory {
      * Job history files contain key="value" pairs, where keys belong to this enum. 
      * It acts as a global namespace for all keys. 
      */
-    public static enum Keys { 
+    public enum Keys {
         JOBTRACKERID,
         START_TIME, FINISH_TIME, JOBID, JOBNAME, USER, JOBCONF, SUBMIT_TIME, 
         LAUNCH_TIME, TOTAL_MAPS, TOTAL_REDUCES, FAILED_MAPS, FAILED_REDUCES, 
@@ -128,7 +128,7 @@ public class JobHistory {
      * since values in history can only be strings - Values.name() is used in 
      * most places in history file. 
      */
-    public static enum Values {
+    public enum Values {
         SUCCESS, FAILED, KILLED, MAP, REDUCE, CLEANUP, RUNNING, PREP, SETUP
     }
 
@@ -1756,14 +1756,14 @@ public class JobHistory {
      * should be implemented and passed to JobHistory.parseHistory() 
      *
      */
-    public static interface Listener{
+    public interface Listener{
         /**
          * Callback method for history parser. 
          * @param recType type of record, which is the first entry in the line. 
          * @param values a map of key-value pairs as thry appear in history.
          * @throws IOException
          */
-        public void handle(RecordTypes recType, Map<Keys, String> values) throws IOException; 
+        void handle(RecordTypes recType, Map<Keys, String> values) throws IOException;
     }
 
     /**

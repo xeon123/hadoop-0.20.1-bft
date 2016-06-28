@@ -453,7 +453,7 @@ public class JobConf extends Configuration {
      * @return the {@link OutputCommitter} implementation for the map-reduce job.
      */
     public OutputCommitter getOutputCommitter() {
-        return (OutputCommitter)ReflectionUtils.newInstance(
+        return ReflectionUtils.newInstance(
                 getClass("mapred.output.committer.class", FileOutputCommitter.class,
                         OutputCommitter.class), this);
     }

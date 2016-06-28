@@ -60,7 +60,7 @@ abstract class Task implements Writable, Configurable {
     String shaname = "";
 
     // Counters used by Task subclasses
-    protected static enum Counter {
+    protected enum Counter {
         MAP_INPUT_RECORDS, 
         MAP_OUTPUT_RECORDS,
         MAP_SKIPPED_RECORDS,
@@ -860,7 +860,7 @@ abstract class Task implements Writable, Configurable {
             throws IOException, InterruptedException {
         reporter.setShuffleTime(start, end);
         ((ReduceTaskStatus)taskStatus).setShuffleStartTime(start);
-        ((ReduceTaskStatus)taskStatus).setShuffleFinishTime(end);
+        taskStatus.setShuffleFinishTime(end);
         umbilical.setShuffleTime(getTaskID(), this.taskStatus);
     }
 
@@ -1194,7 +1194,7 @@ abstract class Task implements Writable, Configurable {
         try {
             contextConstructor = 
                     org.apache.hadoop.mapreduce.Reducer.Context.class.getConstructor
-                    (new Class[]{org.apache.hadoop.mapreduce.Reducer.class,
+                    (org.apache.hadoop.mapreduce.Reducer.class,
                             Configuration.class,
                             org.apache.hadoop.mapreduce.TaskAttemptID.class,
                             RawKeyValueIterator.class,
@@ -1204,7 +1204,7 @@ abstract class Task implements Writable, Configurable {
                             org.apache.hadoop.mapreduce.StatusReporter.class,
                             RawComparator.class,
                             Class.class,
-                            Class.class});
+                            Class.class);
         } catch (NoSuchMethodException nme) {
             throw new IllegalArgumentException("Can't find constructor");
         }
@@ -1377,8 +1377,7 @@ abstract class Task implements Writable, Configurable {
                 throws IOException, InterruptedException, ClassNotFoundException 
                 {
             // make a reducer
-            org.apache.hadoop.mapreduce.Reducer<K,V,K,V> reducer = 
-                    (org.apache.hadoop.mapreduce.Reducer<K,V,K,V>)
+            org.apache.hadoop.mapreduce.Reducer<K,V,K,V> reducer =
                     ReflectionUtils.newInstance(reducerClass, job);
 
             org.apache.hadoop.mapreduce.Reducer.Context 
