@@ -14,14 +14,14 @@ public class MajorityVoting implements VotingSystem {
 
     // mapHashList is a list where TaskID is the id and String[] is an array off hashes of a task. The hashes saved
     // contains the partition
-    private Map<String, List<String>> mapHashList = Collections.synchronizedMap(new HashMap<>());
-    private Map<String, List<String>> redHashList = Collections.synchronizedMap(new HashMap<>());
-    private Map<String, List<String>> firstMapHash= Collections.synchronizedMap(new HashMap<>());
+    private Map<String, List<String>> mapHashList = Collections.synchronizedMap(new HashMap<String, List<String>>());
+    private Map<String, List<String>> redHashList = Collections.synchronizedMap(new HashMap<String, List<String>>());
+    private Map<String, List<String>> firstMapHash= Collections.synchronizedMap(new HashMap<String, List<String>>());
 
     private Map<String, List<TaskCompletionEvent>> buffer = new HashMap<String, List<TaskCompletionEvent>>();
-    private Map<String, List<TaskID>> maptaskList = Collections.synchronizedMap(new HashMap<>());
-    private Map<String, List<TaskID>> redtaskList = Collections.synchronizedMap(new HashMap<>());
-    private List<TaskCompletionEvent> first = new ArrayList<>();
+    private Map<String, List<TaskID>> maptaskList = Collections.synchronizedMap(new HashMap<String, List<TaskID>>());
+    private Map<String, List<TaskID>> redtaskList = Collections.synchronizedMap(new HashMap<String, List<TaskID>>());
+    private List<TaskCompletionEvent> first = new ArrayList<TaskCompletionEvent>();
 
     public static final int NO_MAJORITY=-1;
     public static final int NOT_ENOUGH_ELEMENTS=-2;
