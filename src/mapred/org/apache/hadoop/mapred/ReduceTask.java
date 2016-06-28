@@ -1708,7 +1708,7 @@ class ReduceTask extends Task {
 							+ "\nMAPOUTPUT COMPRESSED: " + compressedLength
 							+ "\nMAPOUTPUT DECOMPRESSED: " + decompressedLength
 							+ "\nMAPOUTPUT STARTOFFSET: " + startOffset
-							+ "\nShaname: " + shaname);
+							+ "\nSHANAME: " + shaname);
 
 					if(mapOutput != null && mapOutput.data != null && mapOutput.data.length > 0) {
 						if(codec == null) {

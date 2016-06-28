@@ -93,7 +93,7 @@ class MapTask extends Task {
 	private static final Log LOG = LogFactory.getLog(MapTask.class.getName());
 
 	{   // set phase for this task
-		setPhase(TaskStatus.Phase.MAP); 
+		setPhase(TaskStatus.Phase.MAP);
 	}
 
 	public MapTask() {
@@ -104,7 +104,7 @@ class MapTask extends Task {
 	public MapTask(String jobFile, TaskAttemptID taskId, int partition, String splitClass, BytesWritable split, String fileName, String[] locations) {
 		super(jobFile, taskId, partition);
 		this.splitClass = splitClass;
-		this.split = split;		
+		this.split = split;
 		this.fileName = fileName;
 		this.locations = locations;
 	}
@@ -162,7 +162,7 @@ class MapTask extends Task {
 	}
 
 	@Override
-	public void write(DataOutput out) 
+	public void write(DataOutput out)
 			throws IOException {
 		super.write(out);
 		if (isMapOrReduce()) {
@@ -199,7 +199,7 @@ class MapTask extends Task {
 		private long beforePos = -1;
 		private long afterPos = -1;
 
-		TrackedRecordReader(RecordReader<K,V> raw, TaskReporter reporter) 
+		TrackedRecordReader(RecordReader<K,V> raw, TaskReporter reporter)
 				throws IOException{
 			rawIn = raw;
 			inputRecordCounter = reporter.getCounter(MAP_INPUT_RECORDS);
@@ -261,11 +261,11 @@ class MapTask extends Task {
 		private long recIndex = -1;
 
 		SkippingRecordReader(RecordReader<K,V> raw, TaskUmbilicalProtocol umbilical,
-				TaskReporter reporter) throws IOException{
+							 TaskReporter reporter) throws IOException{
 			super(raw, reporter);
 			this.umbilical = umbilical;
 			this.skipRecCounter = reporter.getCounter(Counter.MAP_SKIPPED_RECORDS);
-			this.toWriteSkipRecs = toWriteSkipRecs() &&  
+			this.toWriteSkipRecs = toWriteSkipRecs() &&
 					SkipBadRecords.getSkipOutputPath(conf)!=null;
 			skipIt = getSkipRanges().skipRangeIterator();
 		}
@@ -309,7 +309,7 @@ class MapTask extends Task {
 			if(skipWriter==null) {
 				Path skipDir = SkipBadRecords.getSkipOutputPath(conf);
 				Path skipFile = new Path(skipDir, getTaskID().toString());
-				skipWriter = 
+				skipWriter =
 						SequenceFile.createWriter(
 								skipFile.getFileSystem(conf), conf, skipFile,
 								createKey().getClass(),
@@ -358,11 +358,11 @@ class MapTask extends Task {
 	@SuppressWarnings("unchecked")
 	private <INKEY,INVALUE,OUTKEY,OUTVALUE>
 	void runOldMapper(final JobConf job,
-			final BytesWritable rawSplit,
-			final TaskUmbilicalProtocol umbilical,
-			TaskReporter reporter)
-					throws IOException, InterruptedException, ClassNotFoundException 
-					{
+					  final BytesWritable rawSplit,
+					  final TaskUmbilicalProtocol umbilical,
+					  TaskReporter reporter)
+			throws IOException, InterruptedException, ClassNotFoundException
+	{
 		LOG.debug("Running old mapper");
 
 		InputSplit inputSplit = null;
@@ -385,32 +385,32 @@ class MapTask extends Task {
 		RecordReader<INKEY,INVALUE> rawIn =                  // open input
 				job.getInputFormat().getRecordReader(inputSplit, job, reporter);
 
-		RecordReader<INKEY,INVALUE> in = isSkipping() ? 
+		RecordReader<INKEY,INVALUE> in = isSkipping() ?
 				new SkippingRecordReader<INKEY,INVALUE>(rawIn, umbilical, reporter) :
-					new TrackedRecordReader<INKEY,INVALUE>(rawIn, reporter);
-				job.setBoolean("mapred.skip.on", isSkipping());
+				new TrackedRecordReader<INKEY,INVALUE>(rawIn, reporter);
+		job.setBoolean("mapred.skip.on", isSkipping());
 
-				int numReduceTasks;
-				numReduceTasks = conf.getNumReduceTasks();
+		int numReduceTasks;
+		numReduceTasks = conf.getNumReduceTasks();
 
-				MapOutputCollector collector = null;
-				if (numReduceTasks > 0) {
-					collector = new MapOutputBuffer(umbilical, job, reporter);
-				} else { 
-					collector = new DirectMapOutputCollector(umbilical, job, reporter);
-				}
-				MapRunnable<INKEY,INVALUE,OUTKEY,OUTVALUE> runner =
-						ReflectionUtils.newInstance(job.getMapRunnerClass(), job);
+		MapOutputCollector collector = null;
+		if (numReduceTasks > 0) {
+			collector = new MapOutputBuffer(umbilical, job, reporter);
+		} else {
+			collector = new DirectMapOutputCollector(umbilical, job, reporter);
+		}
+		MapRunnable<INKEY,INVALUE,OUTKEY,OUTVALUE> runner =
+				ReflectionUtils.newInstance(job.getMapRunnerClass(), job);
 
-				try {
-					runner.run(in, new OldOutputCollector(collector, conf), reporter);
-					collector.flush();
-				} finally {
-					//close
-					in.close();                               // close input
-					collector.close();
-				}
-					}
+		try {
+			runner.run(in, new OldOutputCollector(collector, conf), reporter);
+			collector.flush();
+		} finally {
+			//close
+			in.close();                               // close input
+			collector.close();
+		}
+	}
 
 	/**
 	 * Update the job with details about the file split
@@ -426,14 +426,14 @@ class MapTask extends Task {
 		}
 	}
 
-	static class NewTrackingRecordReader<K,V> 
-	extends org.apache.hadoop.mapreduce.RecordReader<K,V> {
+	static class NewTrackingRecordReader<K,V>
+			extends org.apache.hadoop.mapreduce.RecordReader<K,V> {
 		private final org.apache.hadoop.mapreduce.RecordReader<K,V> real;
 		private final org.apache.hadoop.mapreduce.Counter inputRecordCounter;
 		private final TaskReporter reporter;
 
 		NewTrackingRecordReader(org.apache.hadoop.mapreduce.RecordReader<K,V> real,
-				TaskReporter reporter) {
+								TaskReporter reporter) {
 			this.real = real;
 			this.reporter = reporter;
 			this.inputRecordCounter = reporter.getCounter(MAP_INPUT_RECORDS);
@@ -461,8 +461,8 @@ class MapTask extends Task {
 
 		@Override
 		public void initialize(org.apache.hadoop.mapreduce.InputSplit split,
-				org.apache.hadoop.mapreduce.TaskAttemptContext context
-				) throws IOException, InterruptedException {
+							   org.apache.hadoop.mapreduce.TaskAttemptContext context
+		) throws IOException, InterruptedException {
 			real.initialize(split, context);
 		}
 
@@ -509,21 +509,21 @@ class MapTask extends Task {
 		}
 
 		@Override
-		public void collect(K key, V value) 
-				throws IOException 
-				{
-			try 
+		public void collect(K key, V value)
+				throws IOException
+		{
+			try
 			{
 				collector.collect(key, value, partitioner.getPartition(key, value, numPartitions));
 			} catch (InterruptedException ie) {
 				Thread.currentThread().interrupt();
 				throw new IOException("interrupt exception", ie);
 			}
-				}
+		}
 	}
 
 	private class NewOutputCollector<K,V>
-	extends org.apache.hadoop.mapreduce.RecordWriter<K,V> {
+			extends org.apache.hadoop.mapreduce.RecordWriter<K,V> {
 		private final MapOutputCollector<K,V> collector;
 
 		private final org.apache.hadoop.mapreduce.Partitioner<K,V> partitioner;
@@ -531,10 +531,10 @@ class MapTask extends Task {
 
 		@SuppressWarnings("unchecked")
 		NewOutputCollector(org.apache.hadoop.mapreduce.JobContext jobContext,
-				JobConf job,
-				TaskUmbilicalProtocol umbilical,
-				TaskReporter reporter)
-						throws IOException, ClassNotFoundException {
+						   JobConf job,
+						   TaskUmbilicalProtocol umbilical,
+						   TaskReporter reporter)
+				throws IOException, ClassNotFoundException {
 			collector = new MapOutputBuffer<K,V>(umbilical, job, reporter);
 			partitions = jobContext.getNumReduceTasks();
 
@@ -552,7 +552,7 @@ class MapTask extends Task {
 		}
 
 		@Override
-		public void write(K key, V value) 
+		public void write(K key, V value)
 				throws IOException, InterruptedException {
 			int part = partitioner.getPartition(key, value, partitions);
 			collector.collect(key, value, part);
@@ -573,17 +573,17 @@ class MapTask extends Task {
 	@SuppressWarnings("unchecked")
 	private <INKEY,INVALUE,OUTKEY,OUTVALUE>
 	void runNewMapper(final JobConf job,
-			final BytesWritable rawSplit,
-			final TaskUmbilicalProtocol umbilical,
-			TaskReporter reporter)
-					throws IOException, ClassNotFoundException, InterruptedException {
+					  final BytesWritable rawSplit,
+					  final TaskUmbilicalProtocol umbilical,
+					  TaskReporter reporter)
+			throws IOException, ClassNotFoundException, InterruptedException {
 		LOG.debug("Running new mapper");
 
 		// make a task context so we can get the classes
 		org.apache.hadoop.mapreduce.TaskAttemptContext taskContext =
 				new org.apache.hadoop.mapreduce.TaskAttemptContext(job, getTaskID());
 
-		List<org.apache.hadoop.mapreduce.Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>> mapperList = 
+		List<org.apache.hadoop.mapreduce.Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>> mapperList =
 				new ArrayList<org.apache.hadoop.mapreduce.Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>>();
 
 		// make a mapper
@@ -594,7 +594,7 @@ class MapTask extends Task {
 		// make the input format
 		org.apache.hadoop.mapreduce.InputFormat<INKEY,INVALUE> inputFormat =
 				(org.apache.hadoop.mapreduce.InputFormat<INKEY,INVALUE>)
-				ReflectionUtils.newInstance(taskContext.getInputFormatClass(), job);
+						ReflectionUtils.newInstance(taskContext.getInputFormatClass(), job);
 
 		// rebuild the input split
 		org.apache.hadoop.mapreduce.InputSplit split = null;
@@ -602,8 +602,8 @@ class MapTask extends Task {
 		splitBuffer.reset(rawSplit.getBytes(), 0, rawSplit.getLength());
 		SerializationFactory factory = new SerializationFactory(job);
 		Deserializer<? extends org.apache.hadoop.mapreduce.InputSplit>
-		deserializer = (Deserializer<? extends org.apache.hadoop.mapreduce.InputSplit>) 
-		factory.getDeserializer(job.getClassByName(splitClass));
+				deserializer = (Deserializer<? extends org.apache.hadoop.mapreduce.InputSplit>)
+				factory.getDeserializer(job.getClassByName(splitClass));
 		deserializer.open(splitBuffer);
 		split = deserializer.deserialize(null);
 
@@ -617,14 +617,14 @@ class MapTask extends Task {
 		try	{
 			Constructor<org.apache.hadoop.mapreduce.Mapper.Context> contextConstructor =
 					org.apache.hadoop.mapreduce.Mapper.Context.class.getConstructor
-					(org.apache.hadoop.mapreduce.Mapper.class,
-							Configuration.class,
-							org.apache.hadoop.mapreduce.TaskAttemptID.class,
-							org.apache.hadoop.mapreduce.RecordReader.class,
-							org.apache.hadoop.mapreduce.RecordWriter.class,
-							org.apache.hadoop.mapreduce.OutputCommitter.class,
-							org.apache.hadoop.mapreduce.StatusReporter.class,
-							org.apache.hadoop.mapreduce.InputSplit.class);
+							(org.apache.hadoop.mapreduce.Mapper.class,
+									Configuration.class,
+									org.apache.hadoop.mapreduce.TaskAttemptID.class,
+									org.apache.hadoop.mapreduce.RecordReader.class,
+									org.apache.hadoop.mapreduce.RecordWriter.class,
+									org.apache.hadoop.mapreduce.OutputCommitter.class,
+									org.apache.hadoop.mapreduce.StatusReporter.class,
+									org.apache.hadoop.mapreduce.InputSplit.class);
 
 			// get an output object
 			if (job.getNumReduceTasks() == 0) {
@@ -635,7 +635,7 @@ class MapTask extends Task {
 
 			org.apache.hadoop.mapreduce.Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE> mapper =
 					(org.apache.hadoop.mapreduce.Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)
-					ReflectionUtils.newInstance(taskContext.getMapperClass(), job);
+							ReflectionUtils.newInstance(taskContext.getMapperClass(), job);
 
 			mapperContext = contextConstructor.newInstance(mapper, job, getTaskID(), input, output, committer, reporter, split);
 
@@ -664,7 +664,7 @@ class MapTask extends Task {
 
 	/**
 	 * Implements MapOutputCollector<K, V> 
-	 * 
+	 *
 	 *
 	 * @param <K>
 	 * @param <V>
@@ -677,7 +677,7 @@ class MapTask extends Task {
 		private final Counters.Counter mapOutputRecordCounter;
 
 		@SuppressWarnings("unchecked")
-		public DirectMapOutputCollector(TaskUmbilicalProtocol umbilical, JobConf job, TaskReporter reporter) 
+		public DirectMapOutputCollector(TaskUmbilicalProtocol umbilical, JobConf job, TaskReporter reporter)
 				throws IOException {
 			this.reporter = reporter;
 			String finalName = getOutputName(getPartition(), Util.getReplicaNumber(getTaskID()));
@@ -697,24 +697,24 @@ class MapTask extends Task {
 
 		}
 
-		public void flush() throws IOException, InterruptedException, ClassNotFoundException 
+		public void flush() throws IOException, InterruptedException, ClassNotFoundException
 		{}
 
 		/**
 		 * Increments counter
 		 */
-		public void collect(K key, V value, int partition) 
-				throws IOException 
-				{
+		public void collect(K key, V value, int partition)
+				throws IOException
+		{
 			reporter.progress();
 			out.write(key, value);
 			mapOutputRecordCounter.increment(1);
-				}
+		}
 
 	}
 
-	class MapOutputBuffer<K extends Object, V extends Object> 
-	implements MapOutputCollector<K, V>, IndexedSortable {
+	class MapOutputBuffer<K extends Object, V extends Object>
+			implements MapOutputCollector<K, V>, IndexedSortable {
 		private final int partitions;
 		private final JobConf job;
 		private final TaskReporter reporter;
@@ -908,9 +908,9 @@ class MapTask extends Task {
 
 					// sufficient acct space
 					kvfull = kvnext == kvstart;
-					final boolean kvsoftlimit = ((kvnext > kvend) ? 
+					final boolean kvsoftlimit = ((kvnext > kvend) ?
 							kvnext - kvend > softRecordLimit :
-								kvend - kvnext <= kvoffsets.length - softRecordLimit);
+							kvend - kvnext <= kvoffsets.length - softRecordLimit);
 
 					if (kvstart == kvend && kvsoftlimit) {
 						startSpill();
@@ -1089,16 +1089,16 @@ class MapTask extends Task {
 					do {
 						if (sortSpillException != null) {
 							throw (IOException)new IOException("Spill failed"
-									).initCause(sortSpillException);
+							).initCause(sortSpillException);
 						}
 
 						// sufficient buffer space?
-						if (bufstart <= bufend && bufend <= bufindex) 
+						if (bufstart <= bufend && bufend <= bufindex)
 						{
 							buffull = bufindex + len > bufvoid;
 							wrap = (bufvoid - bufindex) + bufstart > len;
-						} 
-						else 
+						}
+						else
 						{
 							// bufindex <= bufstart <= bufend
 							// bufend <= bufindex <= bufstart
@@ -1112,7 +1112,7 @@ class MapTask extends Task {
 								// we have records we can spill
 								final boolean bufsoftlimit = (bufindex > bufend)
 										? bufindex - bufend > softBufferLimit
-												: bufend - bufindex < bufvoid - softBufferLimit;
+										: bufend - bufindex < bufvoid - softBufferLimit;
 								if (bufsoftlimit || (buffull && !wrap)) {
 									LOG.info("Spilling map output: buffer full= " + bufsoftlimit);
 									startSpill();
@@ -1123,7 +1123,7 @@ class MapTask extends Task {
 								// collect
 								final int size = ((bufend <= bufindex)
 										? bufindex - bufend
-												: (bufvoid - bufend) + bufindex) + len;
+										: (bufvoid - bufend) + bufindex) + len;
 								bufstart = bufend = bufindex = bufmark = 0;
 								kvstart = kvend = kvindex = 0;
 								bufvoid = kvbuffer.length;
@@ -1140,7 +1140,7 @@ class MapTask extends Task {
 							} catch (InterruptedException e) {
 								throw (IOException)new IOException(
 										"Buffer interrupted while waiting for the writer"
-										).initCause(e);
+								).initCause(e);
 							}
 						}
 					} while (buffull && !wrap);
@@ -1202,8 +1202,8 @@ class MapTask extends Task {
 
 		public void close() { }
 
-		protected class SpillThread 
-		extends Thread {
+		protected class SpillThread
+				extends Thread {
 			@Override
 			public void run() {
 				spillLock.lock();
@@ -1222,7 +1222,7 @@ class MapTask extends Task {
 							sortSpillException = e;
 						} catch (Throwable t) {
 							sortSpillException = t;
-							String logMsg = "Task " + getTaskID() + " failed : " 
+							String logMsg = "Task " + getTaskID() + " failed : "
 									+ StringUtils.stringifyException(t);
 							reportFatalError(getTaskID(), t, logMsg);
 						} finally {
@@ -1251,12 +1251,12 @@ class MapTask extends Task {
 
 		/**
 		 * Write Map output to the disk
-		 * 
+		 *
 		 * @throws IOException
 		 * @throws ClassNotFoundException
 		 * @throws InterruptedException
 		 */
-		private void sortAndSpill() 
+		private void sortAndSpill()
 				throws IOException, ClassNotFoundException, InterruptedException {
 			//approximate the length of the output file to be the length of the
 			//buffer + header lengths for the partitions
@@ -1364,15 +1364,15 @@ class MapTask extends Task {
 				LOG.debug("Exception at the task " + getTaskID() + " - " + ioe.getMessage());
 				umbilical.requestMap(getTaskID());
 				throw ioe;
-			} 
+			}
 			catch(InterruptedException ie) {
-				LOG.debug("Exception at the task " + getTaskID() + " - " + ie.getMessage() 
+				LOG.debug("Exception at the task " + getTaskID() + " - " + ie.getMessage()
 						+ ". It's goint to request more map tasks");
 				umbilical.requestMap(getTaskID());
 				throw ie;
 			}
 			finally {
-				if (out != null) 
+				if (out != null)
 					out.close();
 			}
 		}
@@ -1382,31 +1382,22 @@ class MapTask extends Task {
 		 * @param finalOutputFile
 		 * @param spillRec
 		 * @return
-		 * @throws IOException 
+		 * @throws IOException
 		 */
 		private String[] generateHash(Path finalOutputFile, SpillRecord spillRec) throws IOException {
 			String[] hashList = new String[spillRec.size()];
+            LOG.debug("Hashing file " + finalOutputFile.toString());
 
 			for(int part=0; part<spillRec.size(); part++) {
 				IndexRecord index = spillRec.getIndex(part);
 				LOG.debug("1: HASHING: raw size: " + index.rawLength + " bytes / offset: " + index.startOffset + " partition length: " + index.partLength);
 
 				if(codec != null) {
-					if(shaname.equals("SHA-1")) {
-						byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.partLength);
-						hashList[part] = ShaAbstractHash.convertHashToString(hash);
-					} else {
-						byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.partLength);
-						hashList[part] = ShaAbstractHash.convertHashToString(hash);
-					}
+					byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.partLength);
+					hashList[part] = ShaAbstractHash.convertHashToString(hash);
 				} else {
-					if(shaname.equals("SHA-1")) {
-						byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.rawLength);
-						hashList[part] = ShaAbstractHash.convertHashToString(hash);
-					} else {
-						byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.rawLength);
-						hashList[part] = ShaAbstractHash.convertHashToString(hash);
-					}
+					byte[] hash = hashGen.generateHash(rfs, finalOutputFile, (int) index.startOffset, (int) index.rawLength);
+					hashList[part] = ShaAbstractHash.convertHashToString(hash);
 				}
 			}
 
@@ -1427,6 +1418,11 @@ class MapTask extends Task {
 		}
 
 
+        /**
+         * Send digests to the job tracker
+         * @param digest
+         * @throws IOException
+         */
 		private void sendDigest(String[] digest) throws IOException {
 			if(digest != null)
 				umbilical.sendDigest(getTaskID(), digest);
@@ -1437,8 +1433,8 @@ class MapTask extends Task {
 		 * the in-memory buffer, so we must spill the record from collect
 		 * directly to a spill file. Consider this "losing".
 		 */
-		private void spillSingleRecord(final K key, final V value, int partition) 
-				throws IOException {	
+		private void spillSingleRecord(final K key, final V value, int partition)
+				throws IOException {
 			long size = kvbuffer.length + partitions * APPROX_HEADER_LENGTH;
 			FSDataOutputStream out = null;
 
@@ -1474,7 +1470,7 @@ class MapTask extends Task {
 						rec.compressOutput = writer.getCompressOutput();
 						rec.compressType = writer.getCompressiontype();
 
-						LOG.debug("2 - Spill idx " + parts + " - SegmentStart: " + segmentStart 
+						LOG.debug("2 - Spill idx " + parts + " - SegmentStart: " + segmentStart
 								+ " Part length: " + rec.partLength
 								+ " Raw length: " + rec.rawLength
 								+ " CompressOutput: " + rec.compressOutput
@@ -1515,9 +1511,9 @@ class MapTask extends Task {
 
 			int vallen = (nextindex >= kvindices[kvoff + VALSTART])	?
 					nextindex - kvindices[kvoff + VALSTART]
-							: (bufvoid - kvindices[kvoff + VALSTART]) + nextindex;
+					: (bufvoid - kvindices[kvoff + VALSTART]) + nextindex;
 
-					vbytes.reset(kvbuffer, kvindices[kvoff + VALSTART], vallen);
+			vbytes.reset(kvbuffer, kvindices[kvoff + VALSTART], vallen);
 		}
 
 		/**
@@ -1607,7 +1603,7 @@ class MapTask extends Task {
 					// create index files
 					Path finalIndexFile = new Path(filename[0].getParent(), MapOutputFile.getFileOutIndex());
 					rfs.copyFromLocalFile(spillIndexFile, finalIndexFile);
-					rfs.setPermission(finalIndexFile, FsPermission.createImmutable((short) 0644));	
+					rfs.setPermission(finalIndexFile, FsPermission.createImmutable((short) 0644));
 					rfs.delete(mapOutputFile.getSpillIndexFile(mapId, 0), true);
 				} else {
 					SpillRecord spillRec = indexCacheList.get(0);
@@ -1643,7 +1639,7 @@ class MapTask extends Task {
 			finalIndexFileSize   = partitions * MAP_OUTPUT_INDEX_RECORD_LENGTH;
 			Path finalOutputFile = mapOutputFile.getOutputFileForWrite(mapId, finalOutFileSize);
 
-			LOG.debug("finalOutFileSize: " + finalOutFileSize + " finalIndexFileSize: " + finalIndexFileSize 
+			LOG.debug("finalOutFileSize: " + finalOutFileSize + " finalIndexFileSize: " + finalIndexFileSize
 					+ " finalOutputFile: " + finalOutputFile);
 
 			Path finalIndexFile = mapOutputFile.getOutputIndexFileForWrite(mapId, finalIndexFileSize);
@@ -1665,7 +1661,7 @@ class MapTask extends Task {
 						rec.compressOutput = writer.getCompressOutput();
 						rec.compressType = writer.getCompressiontype();
 
-						LOG.debug("3 - Spill idx " + parts + " - SegmentStart: " + segmentStart 
+						LOG.debug("3 - Spill idx " + parts + " - SegmentStart: " + segmentStart
 								+ " Part length: " + rec.partLength
 								+ " Raw length: " + rec.rawLength
 								+ " CompressOutput: " + rec.compressOutput
@@ -1678,7 +1674,7 @@ class MapTask extends Task {
 					sr.writeToFile(finalIndexFile, job);
 
 					hash = generateHash(finalOutputFile, sr);
-					sendDigest(hash);
+					sendDigest(hash); // send digests to the job tracker
 				} finally {
 					finalOut.close();
 				}
@@ -1739,7 +1735,7 @@ class MapTask extends Task {
 					rec.compressOutput = writer.getCompressOutput();
 					rec.compressType = writer.getCompressiontype();
 
-					LOG.debug("4 - Spill idx " + parts + " - SegmentStart: " + segmentStart 
+					LOG.debug("4 - Spill idx " + parts + " - SegmentStart: " + segmentStart
 							+ " Part length: " + rec.partLength
 							+ " Raw length: " + rec.rawLength
 							+ " CompressOutput: " + rec.compressOutput
@@ -1768,6 +1764,7 @@ class MapTask extends Task {
 				}
 			}
 
+			// send digest to the job tracker
 			sendDigest(hash);
 		}
 	} // MapOutputBuffer
