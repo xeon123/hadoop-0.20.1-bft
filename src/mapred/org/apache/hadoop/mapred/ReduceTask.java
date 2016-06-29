@@ -1742,23 +1742,6 @@ class ReduceTask extends Task {
                 return mapOutput;
             }
 
-            private boolean compareHashes(String digest1) throws IOException {
-                synchronized (digestsHistory) {
-                    LOG.debug("COMP_D1: " + digest1);
-                    LOG.debug("COMP_D2: " + Arrays.toString(digestsHistory.toArray()));
-                    for(String digest2 : digestsHistory) {
-                        if(digest1.equals(digest2))
-                            return true;
-                    }
-                    return false;
-                }
-            }
-
-            private void logHashDebug(MapOutputLocation mapOutputLoc, long decompressedLength, long compressedLength, String digest) {
-                LOG.debug("HASHES1: " + digest + " (" + compressedLength + " / " + decompressedLength + ")");
-            }
-
-
             /**
              * The connection establishment is attempted multiple times and is given up
              * only on the last failure. Instead of connecting with a timeout of
