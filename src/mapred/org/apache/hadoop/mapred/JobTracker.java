@@ -2680,6 +2680,11 @@ JobSubmissionProtocol, TaskTrackerManager, RefreshAuthorizationPolicyProtocol {
         return false;
     }
 
+    /**
+     * Tells if the digests of the task should be tampered.
+     * @param taskid
+     * @return
+     */
     private boolean shouldTamper(TaskAttemptID taskid) {
         if(taskid == null)
             return false;

@@ -96,13 +96,20 @@ public class MajorityVoting implements VotingSystem {
 
         addTask(tid);	
 
-        if(!list.containsKey(id))
-            list.put(id, Arrays.asList(values));
-        else {// concat
-            List<String> temp = new ArrayList<String>(Arrays.asList(values));
-            List<String> v = list.get(id);
-            temp.addAll(v);
-            list.put(id, temp);
+        if(!list.containsKey(id)) {
+            List<String> ldigests = new ArrayList<String>();
+
+            for (String digest : values) {
+                ldigests.add(ShaAbstractHash.convertHashToString(digest.getBytes()));
+            }
+            list.put(id, ldigests);
+        } else {// concat
+            List<String> ldigests = list.get(id);
+            for (String digest : values) {
+                ldigests.add(ShaAbstractHash.convertHashToString(digest.getBytes()));
+            }
+
+            list.put(id, ldigests);
         }
     }
 
