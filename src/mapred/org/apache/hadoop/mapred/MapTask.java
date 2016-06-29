@@ -1368,7 +1368,7 @@ class MapTask extends Task {
 
         /**
          * Generate hash of the output
-         * @param finalOutputFile
+         * @param bytes Bytes used to generate the digest
          * @param spillRec
          * @return
          * @throws IOException
@@ -1383,10 +1383,12 @@ class MapTask extends Task {
 
                 if(codec != null) {
                     byte[] hash = hashGen.generateHash(bis, (int) index.startOffset, (int) index.partLength);
-                    hashList[spillIdx] = ShaAbstractHash.convertHashToString(hash);
+                    hashList[spillIdx] = new String(hash, "UTF-8");
+//                            ShaAbstractHash.convertHashToString(hash);
                 } else {
                     byte[] hash = hashGen.generateHash(bis, (int) index.startOffset, (int) index.rawLength);
-                    hashList[spillIdx] = ShaAbstractHash.convertHashToString(hash);
+                    hashList[spillIdx] = new String(hash, "UTF-8");
+//                            ShaAbstractHash.convertHashToString(hash);
                 }
             }
 

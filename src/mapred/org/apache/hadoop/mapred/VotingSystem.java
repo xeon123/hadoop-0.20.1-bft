@@ -58,9 +58,7 @@ public interface VotingSystem {
 	 * Check if a reduce tasks have a majority of digests
 	 * 
 	 * @param tid ID 
-	 * @param threshold threshold
-	 * @param total number of tasks
-	 * 
+	 *
 	 * @return MAJORITY_VOTING, or NO_MAJORITY, or NOT_ENOUGH_ELEMENTS
 	 */
 	int hasMajorityOfDigests(TaskID tid);

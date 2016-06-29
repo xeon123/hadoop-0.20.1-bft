@@ -2541,6 +2541,13 @@ class JobInProgress {
             jobtracker.markCompletedTaskAttempt(status.getTaskTracker(), taskid);
         } else if (tip.isMapTask()) {
             // save map digests
+            if(LOG.isDebugEnabled()) {
+                String[] digests = status.getDigests();
+                for (String d : digests) {
+                    LOG.debug("Add digest to " + tip.getTIPId().toString() + ": " + ShaAbstractHash.convertHashToString(d.getBytes()));
+                }
+            }
+
             voting.addHash(tip.getTIPId(), true, status.getDigests());
 
             runningMapTasks -= 1;
@@ -2604,6 +2611,13 @@ class JobInProgress {
         } else {
             // save reduce digests
             synchronized (reduce_voters) {
+                if(LOG.isDebugEnabled()) {
+                    String[] digests = status.getDigests();
+                    for (String d : digests) {
+                        LOG.debug("Add digest to " + tip.getTIPId().toString() + ": " + ShaAbstractHash.convertHashToString(d.getBytes()));
+                    }
+                }
+
                 voting.addHash(tip.getTIPId(), false, status.getDigests());
 
                 int maj = voting.hasMajorityOfDigests(tip.getTIPId());
@@ -3079,7 +3093,6 @@ class JobInProgress {
      * @param taskid The task id
      * @param reason The reason that the task failed
      * @param trackerName The task tracker the task failed on
-     * @param siblings The task siblings
      */
     public void failedTask(TaskInProgress tip, TaskAttemptID taskid, String reason,
             TaskStatus.Phase phase, TaskStatus.State state,

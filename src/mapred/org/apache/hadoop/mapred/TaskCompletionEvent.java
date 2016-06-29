@@ -18,17 +18,16 @@
 
 package org.apache.hadoop.mapred;
 
-import static org.apache.hadoop.mapred.Util.getId;
-import static org.apache.hadoop.mapred.Util.getReplicaNumber;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableUtils;
+import org.apache.log4j.Logger;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Arrays;
 
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableUtils;
-import org.apache.log4j.Logger;
+import static org.apache.hadoop.mapred.Util.getId;
+import static org.apache.hadoop.mapred.Util.getReplicaNumber;
 
 /**
  * This is used to track task completion events on job tracker. 
